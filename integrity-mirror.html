@@ -1,1598 +1,688 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Integrity Mirror</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: #f8fafc;
-      }
-      /* Animations */
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
         }
-        to {
-          opacity: 1;
-        }
-      }
-      .animate-fade-in {
-        animation: fadeIn 0.3s ease-out;
-      }
+        /* Animations */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+        
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .animate-slide-up { animation: slideUp 0.4s ease-out; }
 
-      @keyframes slideUp {
-        from {
-          transform: translateY(10px);
-          opacity: 0;
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
-        to {
-          transform: translateY(0);
-          opacity: 1;
-        }
-      }
-      .animate-slide-up {
-        animation: slideUp 0.4s ease-out;
-      }
-
-      @keyframes pulse-ring {
-        0% {
-          transform: scale(0.8);
-          box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
-        }
-        70% {
-          transform: scale(1);
-          box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
-        }
-        100% {
-          transform: scale(0.8);
-          box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
-        }
-      }
-
-      /* Custom scrollbar */
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-      }
-
-      .hidden-view {
-        display: none !important;
-      }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .hidden-view { display: none !important; }
     </style>
-    <script type="importmap">
-      {
-        "imports": {
-          "react": "https://aistudiocdn.com/react@^19.2.0",
-          "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-          "react/": "https://aistudiocdn.com/react@^19.2.0/",
-          "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-          "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
-          "recharts": "https://aistudiocdn.com/recharts@^3.5.1"
-        }
-      }
-    </script>
-  </head>
-  <body class="bg-slate-50 text-slate-900 flex h-screen overflow-hidden">
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.5.1"
+  }
+}
+</script>
+</head>
+<body class="bg-slate-50 text-slate-900 flex h-screen overflow-hidden">
+
     <!-- Sidebar -->
-    <aside
-      class="w-64 bg-slate-900 text-white flex flex-col h-full shrink-0 z-50 shadow-xl"
-    >
-      <div class="p-6 flex items-center gap-3 border-b border-slate-700">
-        <div class="p-2 bg-blue-600 rounded-lg">
-          <i data-lucide="shield-check" class="text-white w-6 h-6"></i>
+    <aside class="w-64 bg-slate-900 text-white flex flex-col h-full shrink-0 z-50 shadow-xl">
+        <div class="p-6 flex items-center gap-3 border-b border-slate-700">
+            <div class="p-2 bg-blue-600 rounded-lg">
+                <i data-lucide="shield-check" class="text-white w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight">Integrity Mirror</h1>
+                <p class="text-xs text-slate-400">Payer AI Validation</p>
+            </div>
         </div>
-        <div>
-          <h1 class="font-bold text-lg tracking-tight">Integrity Mirror</h1>
-          <p class="text-xs text-slate-400">Payer AI Validation</p>
-        </div>
-      </div>
 
-      <nav class="flex-1 overflow-y-auto py-6">
-        <ul class="space-y-2 px-4">
-          <li>
-            <button
-              onclick="router.navigate('dashboard')"
-              id="nav-dashboard"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-slate-400 hover:bg-slate-800 hover:text-white"
-            >
-              <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
-              <span class="font-medium text-sm">Dashboard</span>
-            </button>
-          </li>
-          <li>
-            <button
-              onclick="router.navigate('analytics')"
-              id="nav-analytics"
-              class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-slate-400 hover:bg-slate-800 hover:text-white"
-            >
-              <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
-              <span class="font-medium text-sm">Analytics</span>
-            </button>
-          </li>
-        </ul>
-      </nav>
+        <nav class="flex-1 overflow-y-auto py-6">
+            <ul class="space-y-2 px-4">
+                <li>
+                    <button onclick="router.navigate('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                        <span class="font-medium text-sm">Dashboard</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="router.navigate('analytics')" id="nav-analytics" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-slate-400 hover:bg-slate-800 hover:text-white">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+                        <span class="font-medium text-sm">Analytics</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
 
-      <div class="p-4 border-t border-slate-800">
-        <div class="bg-slate-800 rounded-lg p-4 flex items-center gap-3">
-          <div
-            class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold"
-          >
-            JD
-          </div>
-          <div class="overflow-hidden">
-            <p class="text-sm font-medium truncate">Jane Doe</p>
-            <p class="text-xs text-slate-400 truncate">Senior Auditor</p>
-          </div>
+        <div class="p-4 border-t border-slate-800">
+            <div class="bg-slate-800 rounded-lg p-4 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold">JD</div>
+                <div class="overflow-hidden">
+                    <p class="text-sm font-medium truncate">Jane Doe</p>
+                    <p class="text-xs text-slate-400 truncate">Senior Auditor</p>
+                </div>
+            </div>
         </div>
-      </div>
     </aside>
 
     <!-- Main Content -->
-    <main
-      class="flex-1 h-full overflow-y-auto relative scroll-smooth bg-slate-50"
-      id="main-container"
-    >
-      <!-- DASHBOARD VIEW -->
-      <div id="view-dashboard" class="p-8 space-y-8 pb-20 animate-fade-in">
-        <!-- Header -->
-        <div
-          class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-        >
-          <div>
-            <h1 class="text-2xl font-bold text-slate-900">Claims Dashboard</h1>
-            <p class="text-slate-500 text-sm">
-              Overview of current validation queue and risk assessment
-            </p>
-          </div>
-          <div class="flex items-center gap-4">
-            <button
-              class="p-2 text-slate-400 hover:text-slate-600 relative bg-white border border-slate-200 rounded-lg shadow-sm"
-            >
-              <i data-lucide="bell" class="w-5 h-5"></i>
-              <span
-                class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"
-              ></span>
-            </button>
-
-            <div class="relative">
-              <button
-                onclick="toggleSimMenu()"
-                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all"
-              >
-                <i data-lucide="play" class="w-4 h-4"></i> Simulate New Claim
-                <i data-lucide="chevron-down" class="w-4 h-4"></i>
-              </button>
-              <div
-                id="sim-menu"
-                class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden hidden"
-              >
-                <div
-                  class="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100"
-                >
-                  Select Scenario
+    <main class="flex-1 h-full overflow-y-auto relative scroll-smooth bg-slate-50" id="main-container">
+        
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard" class="p-8 space-y-8 pb-20 animate-fade-in">
+            <!-- Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Claims Dashboard</h1>
+                    <p class="text-slate-500 text-sm">Overview of current validation queue and risk assessment</p>
                 </div>
-                <button
-                  onclick="startSimulation('No Risk')"
-                  class="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm font-medium text-green-700 flex items-center gap-2"
-                >
-                  <div class="w-2 h-2 rounded-full bg-green-500"></div>
-                  No Risk
-                </button>
-                <button
-                  onclick="startSimulation('Low Risk')"
-                  class="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm font-medium text-yellow-700 flex items-center gap-2"
-                >
-                  <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-                  Low Risk
-                </button>
-                <button
-                  onclick="startSimulation('High Risk')"
-                  class="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm font-medium text-red-700 flex items-center gap-2"
-                >
-                  <div class="w-2 h-2 rounded-full bg-red-500"></div>
-                  High Risk
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- KPI Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <!-- No Risk -->
-          <div
-            class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all"
-          >
-            <div class="flex justify-between items-start mb-4">
-              <span
-                class="text-xs font-bold text-green-500 uppercase tracking-wider"
-                >No Risk</span
-              >
-              <div class="p-2 bg-green-100 text-green-600 rounded-lg">
-                <i data-lucide="check" class="w-5 h-5"></i>
-              </div>
-            </div>
-            <div class="mb-6">
-              <h3 class="text-3xl font-bold text-slate-900">1,247</h3>
-            </div>
-            <div>
-              <p class="text-slate-400 text-xs mb-1">Financial Exposure</p>
-              <p class="text-lg font-bold text-slate-800">$2,450,320</p>
-            </div>
-          </div>
-          <!-- Low Risk -->
-          <div
-            class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all"
-          >
-            <div class="flex justify-between items-start mb-4">
-              <span
-                class="text-xs font-bold text-yellow-500 uppercase tracking-wider"
-                >Low Risk</span
-              >
-              <div class="p-2 bg-yellow-100 text-yellow-600 rounded-lg">
-                <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-              </div>
-            </div>
-            <div class="mb-6">
-              <h3 class="text-3xl font-bold text-slate-900">328</h3>
-            </div>
-            <div>
-              <p class="text-slate-400 text-xs mb-1">Financial Exposure</p>
-              <p class="text-lg font-bold text-slate-800">$875,640</p>
-            </div>
-          </div>
-          <!-- High Risk -->
-          <div
-            class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all"
-          >
-            <div class="flex justify-between items-start mb-4">
-              <span
-                class="text-xs font-bold text-red-500 uppercase tracking-wider"
-                >High Risk</span
-              >
-              <div class="p-2 bg-red-100 text-red-600 rounded-lg">
-                <i data-lucide="alert-circle" class="w-5 h-5"></i>
-              </div>
-            </div>
-            <div class="mb-6">
-              <h3 class="text-3xl font-bold text-slate-900">89</h3>
-            </div>
-            <div>
-              <p class="text-slate-400 text-xs mb-1">Financial Exposure</p>
-              <p class="text-lg font-bold text-slate-800">$1,234,500</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Charts -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div
-            class="bg-white p-6 rounded-xl shadow-sm border border-slate-100"
-          >
-            <h3 class="text-lg font-semibold text-slate-900 mb-6">
-              Risk Distribution Trend
-            </h3>
-            <div class="h-[300px] w-full">
-              <canvas id="trendChart"></canvas>
-            </div>
-          </div>
-          <div
-            class="bg-white p-6 rounded-xl shadow-sm border border-slate-100"
-          >
-            <h3 class="text-lg font-semibold text-slate-900 mb-6">
-              Top Providers - High Risk Claims
-            </h3>
-            <div class="h-[300px] w-full">
-              <canvas id="providerChart"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <!-- Claims Table -->
-        <div
-          class="bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col"
-        >
-          <div
-            class="p-6 border-b border-slate-100 flex justify-between items-center"
-          >
-            <h2 class="text-lg font-bold text-slate-900">
-              Incoming Claims Queue
-            </h2>
-            <div class="relative">
-              <i
-                data-lucide="search"
-                class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"
-              ></i>
-              <input
-                type="text"
-                id="claim-search"
-                placeholder="Search claims..."
-                class="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64"
-              />
-            </div>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
-              <thead
-                class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider"
-              >
-                <tr>
-                  <th class="px-6 py-4 font-semibold">Claim ID</th>
-                  <th class="px-6 py-4 font-semibold">Provider / Patient</th>
-                  <th class="px-6 py-4 font-semibold">DRG / Procedure</th>
-                  <th class="px-6 py-4 font-semibold">Amount</th>
-                  <th class="px-6 py-4 font-semibold">Risk Level</th>
-                  <th class="px-6 py-4 font-semibold">Status</th>
-                  <th class="px-6 py-4 font-semibold text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody id="claims-table-body" class="divide-y divide-slate-100">
-                <!-- Rows injected by JS -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- DETAIL VIEW -->
-      <div id="view-detail" class="hidden flex flex-col min-h-full">
-        <!-- Loading/Analysis Overlay (Hidden by default) -->
-        <div
-          id="analysis-overlay"
-          class="absolute inset-0 z-50 bg-gradient-to-br from-blue-50 via-white to-indigo-50 hidden flex-col items-center justify-center"
-        >
-          <div
-            class="bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-2xl max-w-lg w-full border border-white"
-          >
-            <div class="flex items-center gap-4 mb-8">
-              <div
-                class="w-14 h-14 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30"
-              >
-                <i data-lucide="brain-circuit" class="w-8 h-8"></i>
-              </div>
-              <div>
-                <h2 class="text-2xl font-bold text-slate-800 tracking-tight">
-                  Integrity Engine
-                </h2>
-                <p class="text-blue-600 font-medium">
-                  Processing Digital Twin Analysis
-                </p>
-              </div>
-            </div>
-            <div class="space-y-6 relative" id="analysis-steps">
-              <!-- Steps injected by JS -->
-            </div>
-          </div>
-        </div>
-
-        <!-- Detail Content -->
-        <div id="detail-content" class="flex flex-col h-full bg-slate-50">
-          <!-- Header -->
-          <div
-            class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center z-40 shadow-sm sticky top-0"
-          >
-            <div class="flex items-center gap-4">
-              <button
-                onclick="router.navigate('dashboard')"
-                class="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
-              >
-                <i data-lucide="x" class="w-5 h-5"></i>
-              </button>
-              <div>
-                <h1
-                  class="text-xl font-bold text-slate-900 flex items-center gap-3"
-                  id="detail-title"
-                >
-                  <!-- Title Injected -->
-                </h1>
-                <p class="text-sm text-slate-500" id="detail-subtitle"></p>
-              </div>
-            </div>
-            <div class="flex items-center gap-6">
-              <div class="text-right">
-                <p
-                  class="text-xs text-slate-400 font-bold uppercase tracking-wide"
-                >
-                  AI Confidence
-                </p>
-                <div class="flex items-center justify-end gap-1.5">
-                  <div
-                    class="w-2 h-2 rounded-full bg-green-500 animate-pulse"
-                  ></div>
-                  <p
-                    class="text-lg font-bold text-slate-900"
-                    id="detail-confidence"
-                  >
-                    98%
-                  </p>
+                <div class="flex items-center gap-4">
+                    <button class="p-2 text-slate-400 hover:text-slate-600 relative bg-white border border-slate-200 rounded-lg shadow-sm">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                    </button>
+                    
+                    <div class="relative">
+                        <button onclick="toggleSimMenu()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
+                            <i data-lucide="play" class="w-4 h-4"></i> Simulate New Claim <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </button>
+                        <div id="sim-menu" class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden hidden">
+                            <div class="px-3 py-2 text-xs font-bold text-slate-400 uppercase tracking-wider bg-slate-50 border-b border-slate-100">Select Scenario</div>
+                            <button onclick="startSimulation('No Risk')" class="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm font-medium text-green-700 flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-green-500"></div> No Risk
+                            </button>
+                            <button onclick="startSimulation('Low Risk')" class="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm font-medium text-yellow-700 flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-yellow-500"></div> Low Risk
+                            </button>
+                            <button onclick="startSimulation('High Risk')" class="w-full text-left px-4 py-3 hover:bg-slate-50 text-sm font-medium text-red-700 flex items-center gap-2">
+                                <div class="w-2 h-2 rounded-full bg-red-500"></div> High Risk
+                            </button>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div class="h-8 w-px bg-slate-200"></div>
-              <button
-                id="detail-action-btn"
-                class="text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm"
-              >
-                <!-- Action Btn injected -->
-              </button>
             </div>
-          </div>
 
-          <!-- Tabs -->
-          <div
-            class="flex items-center border-b border-slate-200 bg-white px-8 sticky top-[73px] z-30"
-          >
-            <button
-              onclick="switchTab('details')"
-              id="tab-details"
-              class="px-4 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 border-blue-600 text-blue-600"
-            >
-              <i data-lucide="file-text" class="w-4 h-4"></i> Claim Intake
-            </button>
-            <button
-              onclick="switchTab('twin')"
-              id="tab-twin"
-              class="px-4 py-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-2"
-            >
-              <i data-lucide="brain-circuit" class="w-4 h-4"></i> Digital Twin
-            </button>
-            <button
-              onclick="switchTab('evidence')"
-              id="tab-evidence"
-              class="px-4 py-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-2"
-            >
-              <i data-lucide="split" class="w-4 h-4"></i> Root Cause
-            </button>
-            <button
-              onclick="switchTab('guidance')"
-              id="tab-guidance"
-              class="px-4 py-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-2"
-            >
-              <i data-lucide="stethoscope" class="w-4 h-4"></i> Guidance
-            </button>
-          </div>
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- No Risk -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs font-bold text-green-500 uppercase tracking-wider">No Risk</span>
+                        <div class="p-2 bg-green-100 text-green-600 rounded-lg"><i data-lucide="check" class="w-5 h-5"></i></div>
+                    </div>
+                    <div class="mb-6"><h3 class="text-3xl font-bold text-slate-900">1,247</h3></div>
+                    <div><p class="text-slate-400 text-xs mb-1">Financial Exposure</p><p class="text-lg font-bold text-slate-800">$2,450,320</p></div>
+                </div>
+                <!-- Low Risk -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs font-bold text-yellow-500 uppercase tracking-wider">Low Risk</span>
+                        <div class="p-2 bg-yellow-100 text-yellow-600 rounded-lg"><i data-lucide="alert-triangle" class="w-5 h-5"></i></div>
+                    </div>
+                    <div class="mb-6"><h3 class="text-3xl font-bold text-slate-900">328</h3></div>
+                    <div><p class="text-slate-400 text-xs mb-1">Financial Exposure</p><p class="text-lg font-bold text-slate-800">$875,640</p></div>
+                </div>
+                <!-- High Risk -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-all">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-xs font-bold text-red-500 uppercase tracking-wider">High Risk</span>
+                        <div class="p-2 bg-red-100 text-red-600 rounded-lg"><i data-lucide="alert-circle" class="w-5 h-5"></i></div>
+                    </div>
+                    <div class="mb-6"><h3 class="text-3xl font-bold text-slate-900">89</h3></div>
+                    <div><p class="text-slate-400 text-xs mb-1">Financial Exposure</p><p class="text-lg font-bold text-slate-800">$1,234,500</p></div>
+                </div>
+            </div>
 
-          <!-- Tab Content Areas -->
-          <div class="flex-1 overflow-y-auto p-8" id="tab-content-area">
-            <!-- Injected by JS -->
-          </div>
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-6">Risk Distribution Trend</h3>
+                    <div class="h-[300px] w-full"><canvas id="trendChart"></canvas></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-900 mb-6">Top Providers - High Risk Claims</h3>
+                    <div class="h-[300px] w-full"><canvas id="providerChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Claims Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-100 flex flex-col">
+                <div class="p-6 border-b border-slate-100 flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-slate-900">Incoming Claims Queue</h2>
+                    <div class="relative">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4"></i>
+                        <input type="text" id="claim-search" placeholder="Search claims..." class="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none w-64">
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold">Claim ID</th>
+                                <th class="px-6 py-4 font-semibold">Provider / Patient</th>
+                                <th class="px-6 py-4 font-semibold">DRG / Procedure</th>
+                                <th class="px-6 py-4 font-semibold">Amount</th>
+                                <th class="px-6 py-4 font-semibold">Risk Level</th>
+                                <th class="px-6 py-4 font-semibold">Status</th>
+                                <th class="px-6 py-4 font-semibold text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="claims-table-body" class="divide-y divide-slate-100">
+                            <!-- Rows injected by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- ANALYTICS VIEW -->
-      <div id="view-analytics" class="hidden p-8 space-y-8 animate-fade-in">
-        <h2 class="text-2xl font-bold text-slate-900">System Analytics</h2>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div
-            class="bg-white p-6 rounded-xl shadow-sm border border-slate-200"
-          >
-            <h3 class="font-semibold text-slate-900 mb-6">
-              Recovered Savings vs Risk
-            </h3>
-            <div class="h-80"><canvas id="analyticsBarChart"></canvas></div>
-          </div>
-          <div
-            class="bg-white p-6 rounded-xl shadow-sm border border-slate-200"
-          >
-            <h3 class="font-semibold text-slate-900 mb-6">
-              Root Cause Distribution
-            </h3>
-            <div class="h-80"><canvas id="analyticsPieChart"></canvas></div>
-          </div>
-        </div>
-      </div>
+        <!-- DETAIL VIEW -->
+        <div id="view-detail" class="hidden flex flex-col min-h-full">
+            <!-- Loading/Analysis Overlay (Hidden by default) -->
+            <div id="analysis-overlay" class="absolute inset-0 z-50 bg-gradient-to-br from-blue-50 via-white to-indigo-50 hidden flex-col items-center justify-center">
+                <div class="bg-white/80 backdrop-blur-xl p-10 rounded-3xl shadow-2xl max-w-lg w-full border border-white">
+                    <div class="flex items-center gap-4 mb-8">
+                        <div class="w-14 h-14 bg-blue-600 text-white rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+                            <i data-lucide="brain-circuit" class="w-8 h-8"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Integrity Engine</h2>
+                            <p class="text-blue-600 font-medium">Processing Digital Twin Analysis</p>
+                        </div>
+                    </div>
+                    <div class="space-y-6 relative" id="analysis-steps">
+                        <!-- Steps injected by JS -->
+                    </div>
+                </div>
+            </div>
 
-      <!-- Simulation Progress Overlay -->
-      <div
-        id="simulation-overlay"
-        class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden"
-      >
-        <div
-          class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 animate-slide-up"
-        >
-          <div class="flex items-center gap-4 mb-6">
-            <div
-              class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center"
-            >
-              <i data-lucide="file-text" class="w-6 h-6"></i>
+            <!-- Detail Content -->
+            <div id="detail-content" class="flex flex-col h-full bg-slate-50">
+                <!-- Header -->
+                <div class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center z-40 shadow-sm sticky top-0">
+                    <div class="flex items-center gap-4">
+                        <button onclick="router.navigate('dashboard')" class="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-xl font-bold text-slate-900 flex items-center gap-3" id="detail-title">
+                                <!-- Title Injected -->
+                            </h1>
+                            <p class="text-sm text-slate-500" id="detail-subtitle"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-6">
+                        <div class="text-right">
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-wide">AI Confidence</p>
+                            <div class="flex items-center justify-end gap-1.5">
+                                <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                <p class="text-lg font-bold text-slate-900" id="detail-confidence">98%</p>
+                            </div>
+                        </div>
+                        <div class="h-8 w-px bg-slate-200"></div>
+                        <button id="detail-action-btn" class="text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm">
+                            <!-- Action Btn injected -->
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex items-center border-b border-slate-200 bg-white px-8 sticky top-[73px] z-30">
+                    <button onclick="switchTab('details')" id="tab-details" class="px-4 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 border-blue-600 text-blue-600">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> Claim Intake
+                    </button>
+                    <button onclick="switchTab('twin')" id="tab-twin" class="px-4 py-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-2">
+                        <i data-lucide="brain-circuit" class="w-4 h-4"></i> Digital Twin
+                    </button>
+                    <button onclick="switchTab('evidence')" id="tab-evidence" class="px-4 py-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-2">
+                        <i data-lucide="split" class="w-4 h-4"></i> Root Cause
+                    </button>
+                    <button onclick="switchTab('guidance')" id="tab-guidance" class="px-4 py-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-2">
+                        <i data-lucide="stethoscope" class="w-4 h-4"></i> Guidance
+                    </button>
+                </div>
+
+                <!-- Tab Content Areas -->
+                <div class="flex-1 overflow-y-auto p-8" id="tab-content-area">
+                    <!-- Injected by JS -->
+                </div>
             </div>
-            <div>
-              <h3 class="text-lg font-bold text-slate-900">
-                Processing Submission
-              </h3>
-              <p class="text-sm text-slate-500">Ingesting claim data...</p>
-            </div>
-          </div>
-          <div class="space-y-2">
-            <div
-              class="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-500"
-            >
-              <span>Progress</span>
-              <span id="sim-progress-text">0%</span>
-            </div>
-            <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                id="sim-progress-bar"
-                class="h-full bg-blue-600 rounded-full transition-all duration-100 ease-out"
-                style="width: 0%"
-              ></div>
-            </div>
-          </div>
-          <div class="mt-6 text-xs text-center text-slate-400">
-            Validating formats • OCR Scanning • Payer Rules Engine
-          </div>
         </div>
-      </div>
+
+        <!-- ANALYTICS VIEW -->
+        <div id="view-analytics" class="hidden p-8 space-y-8 animate-fade-in">
+            <h2 class="text-2xl font-bold text-slate-900">System Analytics</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-semibold text-slate-900 mb-6">Recovered Savings vs Risk</h3>
+                    <div class="h-80"><canvas id="analyticsBarChart"></canvas></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                    <h3 class="font-semibold text-slate-900 mb-6">Root Cause Distribution</h3>
+                    <div class="h-80"><canvas id="analyticsPieChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Progress Overlay -->
+        <div id="simulation-overlay" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm hidden">
+            <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 animate-slide-up">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                        <i data-lucide="file-text" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Processing Submission</h3>
+                        <p class="text-sm text-slate-500">Ingesting claim data...</p>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <span>Progress</span>
+                        <span id="sim-progress-text">0%</span>
+                    </div>
+                    <div class="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="sim-progress-bar" class="h-full bg-blue-600 rounded-full transition-all duration-100 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
+                <div class="mt-6 text-xs text-center text-slate-400">Validating formats • OCR Scanning • Payer Rules Engine</div>
+            </div>
+        </div>
+
     </main>
 
     <script>
-      // --- DATA CONSTANTS ---
-      const ATTACHMENTS = {
-        "C-2003": [
-          {
-            name: "Admission_FaceSheet.pdf",
-            type: "pdf",
-            date: "2024-05-18",
-            content:
-              "ADMISSION FACESHEET\nPatient: David Lee\n*DOB: 03/15/1962*  <-- [MISMATCH: Claim says 1960]\nAdmit Date: 05/18/2024",
-          },
-          {
-            name: "Progress_Notes.pdf",
-            type: "pdf",
-            date: "2024-05-19",
-            content:
-              "INPATIENT PROGRESS NOTE\nVitals: Temp 98.6, HR 72, BP 120/80, RR 16, SpO2 98% on Room Air.\nNOTE: *No criteria for Sepsis or Severe Respiratory Failure met*. Patient stable.",
-          },
-        ],
-      };
-      // Generate mock data for all 15 claims
-      const MOCK_CLAIMS = [
-        {
-          id: "C-2001",
-          patientName: "John Smith",
-          patientDob: "1980-04-12",
-          memberId: "MEM-882910",
-          gender: "Male",
-          provider: "City Hospital",
-          providerNpi: "1234567890",
-          facility: "City Hospital Main Campus",
-          admissionDate: "2024-05-18",
-          dischargeDate: "2024-05-20",
-          claimType: "Facility DRG",
-          diagnosisCode: "J18.9",
-          diagnosisDescription: "Pneumonia, unspecified organism",
-          procedureCode: "99223",
-          procedureDescription: "Initial hospital care",
-          drgCode: "194",
-          drgDescription: "Simple Pneumonia & Pleurisy w CC",
-          amount: 12000,
-          units: 1,
-          modifiers: [],
-          date: "2024-05-20",
-          status: "Approved",
-          riskScore: 5,
-          clinicalSummary:
-            "Admission note confirms pneumonia diagnosis (J18.9). Procedure 99223. No issues.",
-          attachments: [
-            {
-              name: "Admission_Note.pdf",
-              type: "pdf",
-              date: "2024-05-18",
-              size: "1.2MB",
-              content:
-                "ADMISSION H&P\nPatient: John Smith\nDate: 05/18/2024\nAssessment: Community Acquired Pneumonia (J18.9).\nPlan: Admit to Medical Floor. Start Ceftriaxone.",
-            },
-          ],
-        },
-        {
-          id: "C-2002",
-          patientName: "Sarah Johnson",
-          patientDob: "1975-08-22",
-          memberId: "MEM-445102",
-          gender: "Female",
-          provider: "Regional Medical Center",
-          providerNpi: "9876543210",
-          facility: "Regional Med Center Outpatient",
-          admissionDate: "2024-05-21",
-          dischargeDate: "2024-05-21",
-          claimType: "Professional",
-          diagnosisCode: "I10",
-          diagnosisDescription: "Essential (primary) hypertension",
-          procedureCode: "99213",
-          procedureDescription: "Office/outpatient visit est",
-          amount: 250,
-          units: 1,
-          modifiers: ["25"],
-          date: "2024-05-21",
-          status: "In Review",
-          riskScore: 35,
-          clinicalSummary:
-            "Hypertension (I10). Missing lab result (BMP) in documentation.",
-          attachments: [
-            {
-              name: "Office_Visit_Note.pdf",
-              type: "pdf",
-              date: "2024-05-21",
-              size: "0.5MB",
-              content:
-                "OFFICE VISIT\nAssessment: Essential Hypertension (I10).\nPlan: *Reviewed lab results drawn today (BMP)* - [NOT ATTACHED].",
-            },
-          ],
-        },
-        {
-          id: "C-2003",
-          patientName: "David Lee",
-          patientDob: "1960-03-15",
-          memberId: "MEM-112233",
-          gender: "Male",
-          provider: "Metro General Hospital",
-          providerNpi: "1122334455",
-          facility: "Metro General Inpatient Wing",
-          admissionDate: "2024-05-18",
-          dischargeDate: "2024-05-22",
-          claimType: "Facility DRG",
-          diagnosisCode: "J18.9",
-          diagnosisDescription: "Pneumonia, unspecified organism",
-          procedureCode: "99223",
-          procedureDescription: "Initial hospital care",
-          drgCode: "193",
-          drgDescription: "Simple Pneumonia & Pleurisy w MCC",
-          amount: 19000,
-          units: 1,
-          modifiers: [],
-          date: "2024-05-22",
-          status: "Flagged",
-          riskScore: 92,
-          clinicalSummary:
-            "Pneumonia (J18.9). Upcoding suspected; Missing clinical evidence; Patient DOB mismatch.",
-          attachments: ATTACHMENTS["C-2003"],
-        },
-        {
-          id: "C-2004",
-          patientName: "Maria Gonzalez",
-          patientDob: "1985-11-05",
-          memberId: "MEM-998877",
-          gender: "Female",
-          provider: "Sunrise Clinic",
-          providerNpi: "5566778899",
-          facility: "Sunrise Clinic Lab",
-          admissionDate: "2024-05-22",
-          claimType: "Professional",
-          diagnosisCode: "E11.9",
-          diagnosisDescription: "Type 2 diabetes mellitus w/o complications",
-          procedureCode: "83036",
-          procedureDescription: "Hemoglobin A1C Level",
-          amount: 150,
-          units: 1,
-          date: "2024-05-22",
-          status: "Approved",
-          riskScore: 2,
-          clinicalSummary:
-            "Diabetes screening (E11.9). Documentation aligns with code.",
-          attachments: [
-            {
-              name: "Lab_Results.pdf",
-              type: "pdf",
-              date: "2024-05-22",
-              size: "0.4MB",
-              content: "LAB RESULTS\nTest: Hemoglobin A1c\nResult: 6.8%",
-            },
-          ],
-        },
-        {
-          id: "C-2005",
-          patientName: "James Carter",
-          patientDob: "1955-06-30",
-          memberId: "MEM-334455",
-          gender: "Male",
-          provider: "Lakeside Hospital",
-          providerNpi: "6677889900",
-          facility: "Lakeside Cardiac Center",
-          admissionDate: "2024-05-23",
-          claimType: "Professional",
-          diagnosisCode: "I25.10",
-          diagnosisDescription: "Atherosclerotic heart disease",
-          procedureCode: "92928",
-          procedureDescription: "Stent Placement",
-          amount: 15000,
-          units: 1,
-          modifiers: ["LC"],
-          date: "2024-05-23",
-          status: "Flagged",
-          riskScore: 88,
-          clinicalSummary:
-            "Coronary Atherosclerosis (I25.10). Incorrect coding; Missing cath lab report.",
-          attachments: [
-            {
-              name: "Op_Report_Draft.doc",
-              type: "doc",
-              date: "2024-05-23",
-              size: "0.1MB",
-              content:
-                "OPERATIVE NOTE (DRAFT)\nIntervention: *DES deployed to mid-LAD*.\nCoding Note: Provider billed 92928-LC (Left Circumflex). Documentation supports LAD only.\n*PENDING FINAL CATH LAB REPORT*",
-            },
-          ],
-        },
-        {
-          id: "C-2006",
-          patientName: "Emily Davis",
-          patientDob: "1990-01-15",
-          memberId: "MEM-221100",
-          gender: "Female",
-          provider: "Northside Medical",
-          providerNpi: "7788990011",
-          facility: "Northside Pulmonology",
-          admissionDate: "2024-05-23",
-          claimType: "Professional",
-          diagnosisCode: "J45.909",
-          diagnosisDescription: "Unspecified asthma, uncomplicated",
-          procedureCode: "94640",
-          procedureDescription: "Airway Inhalation Treatment",
-          amount: 400,
-          units: 2,
-          date: "2024-05-23",
-          status: "In Review",
-          riskScore: 40,
-          clinicalSummary:
-            "Asthma (J45.909). Incomplete spirometry documentation.",
-          attachments: [
-            {
-              name: "Clinic_Note.pdf",
-              type: "pdf",
-              date: "2024-05-23",
-              size: "0.6MB",
-              content:
-                "PULMONARY CLINIC NOTE\nPlan: Spirometry performed.\n*[SPIROMETRY DATA FIELD BLANK]*",
-            },
-          ],
-        },
-        {
-          id: "C-2007",
-          patientName: "Robert Brown",
-          patientDob: "2001-09-09",
-          memberId: "MEM-774411",
-          gender: "Male",
-          provider: "City Hospital",
-          providerNpi: "1234567890",
-          facility: "City Hospital Surgery Center",
-          admissionDate: "2024-05-24",
-          dischargeDate: "2024-05-25",
-          claimType: "Facility DRG",
-          diagnosisCode: "K35.80",
-          diagnosisDescription: "Unspecified acute appendicitis",
-          procedureCode: "44950",
-          procedureDescription: "Appendectomy",
-          amount: 8000,
-          units: 1,
-          date: "2024-05-24",
-          status: "Approved",
-          riskScore: 4,
-          clinicalSummary:
-            "Acute Appendicitis (K35.80). Documentation complete.",
-          attachments: [
-            {
-              name: "Surgical_Report.pdf",
-              type: "pdf",
-              date: "2024-05-24",
-              size: "1.5MB",
-              content:
-                "OPERATIVE REPORT\nFindings: *Inflamed, non-perforated appendix identified*.",
-            },
-          ],
-        },
-        {
-          id: "C-2008",
-          patientName: "Linda White",
-          patientDob: "1948-12-01",
-          memberId: "MEM-665544",
-          gender: "Female",
-          provider: "Regional Medical Center",
-          providerNpi: "9876543210",
-          facility: "Regional Stroke Unit",
-          admissionDate: "2024-05-20",
-          dischargeDate: "2024-05-24",
-          claimType: "Facility DRG",
-          diagnosisCode: "I63.9",
-          diagnosisDescription: "Cerebral infarction, unspecified",
-          procedureCode: "99223",
-          procedureDescription: "Initial hospital care",
-          drgCode: "061",
-          drgDescription: "Ischemic Stroke w Use of Thrombolytic Agent w MCC",
-          amount: 22000,
-          units: 1,
-          date: "2024-05-24",
-          status: "Flagged",
-          riskScore: 95,
-          clinicalSummary:
-            "Stroke (I63.9). Upcoding suspected; Missing neuroimaging evidence.",
-          attachments: [
-            {
-              name: "Discharge_Summary.pdf",
-              type: "pdf",
-              date: "2024-05-24",
-              size: "1.1MB",
-              content:
-                "DISCHARGE SUMMARY\n*tPA was NOT administered due to time window*.\nCoding Query: DRG 061 billed (Use of Thrombolytic Agent). Correct DRG should be 062/065.",
-            },
-          ],
-        },
-        {
-          id: "C-2009",
-          patientName: "Michael Green",
-          patientDob: "1965-04-20",
-          memberId: "MEM-332211",
-          gender: "Male",
-          provider: "Metro General Hospital",
-          providerNpi: "1122334455",
-          facility: "Metro Dialysis Center",
-          admissionDate: "2024-05-25",
-          claimType: "Professional",
-          diagnosisCode: "N18.6",
-          diagnosisDescription: "End stage renal disease",
-          procedureCode: "90935",
-          procedureDescription: "Hemodialysis Procedure",
-          amount: 600,
-          units: 1,
-          date: "2024-05-25",
-          status: "In Review",
-          riskScore: 30,
-          clinicalSummary: "ESRD (N18.6). Missing dialysis session note.",
-          attachments: [
-            {
-              name: "Billing_Face_Sheet.pdf",
-              type: "pdf",
-              date: "2024-05-25",
-              size: "0.2MB",
-              content:
-                "BILLING FACE SHEET\nCode: 90935.\nNote: *Session Log missing from packet*.",
-            },
-          ],
-        },
-        {
-          id: "C-2010",
-          patientName: "Patricia Hall",
-          patientDob: "1995-07-17",
-          memberId: "MEM-009988",
-          gender: "Female",
-          provider: "Sunrise Clinic",
-          providerNpi: "5566778899",
-          facility: "Sunrise Urgent Care",
-          admissionDate: "2024-05-25",
-          claimType: "Professional",
-          diagnosisCode: "J06.9",
-          diagnosisDescription: "Acute upper respiratory infection",
-          procedureCode: "99212",
-          procedureDescription: "Outpatient visit Level 2",
-          amount: 120,
-          units: 1,
-          date: "2024-05-25",
-          status: "Approved",
-          riskScore: 1,
-          clinicalSummary:
-            "Upper Resp Infection (J06.9). Documentation supports Level 2.",
-          attachments: [
-            {
-              name: "Encounter_Note.pdf",
-              type: "pdf",
-              date: "2024-05-25",
-              size: "0.3MB",
-              content:
-                "URGENT CARE NOTE\nDx: URI.\nLevel of Service: *99212* (Straightforward decision making).",
-            },
-          ],
-        },
-        {
-          id: "C-2011",
-          patientName: "William King",
-          patientDob: "1950-02-28",
-          memberId: "MEM-776655",
-          gender: "Male",
-          provider: "Lakeside Hospital",
-          providerNpi: "6677889900",
-          facility: "Lakeside Oncology",
-          admissionDate: "2024-05-26",
-          claimType: "Professional",
-          diagnosisCode: "C50.919",
-          diagnosisDescription:
-            "Malignant neoplasm of unsp site of unspecified breast",
-          procedureCode: "19307",
-          procedureDescription: "Mastectomy, Modified Radical",
-          amount: 9000,
-          units: 1,
-          modifiers: ["RT"],
-          date: "2024-05-26",
-          status: "Flagged",
-          riskScore: 90,
-          clinicalSummary:
-            "Breast Cancer (C50.919). Incorrect coding; Missing pathology report.",
-          attachments: [
-            {
-              name: "Op_Note.pdf",
-              type: "pdf",
-              date: "2024-05-26",
-              size: "1.4MB",
-              content:
-                "OPERATIVE NOTE\nBilled: 19307.\nProcedure: Simple Mastectomy.\n*No axillary lymph node dissection performed*.\nCorrect Code should be 19303.",
-            },
-          ],
-        },
-        {
-          id: "C-2012",
-          patientName: "Barbara Scott",
-          patientDob: "1970-10-10",
-          memberId: "MEM-443322",
-          gender: "Female",
-          provider: "Northside Medical",
-          providerNpi: "7788990011",
-          facility: "Northside Lab",
-          admissionDate: "2024-05-26",
-          claimType: "Professional",
-          diagnosisCode: "E78.5",
-          diagnosisDescription: "Hyperlipidemia, unspecified",
-          procedureCode: "80061",
-          procedureDescription: "Lipid Panel",
-          amount: 200,
-          units: 1,
-          date: "2024-05-26",
-          status: "In Review",
-          riskScore: 28,
-          clinicalSummary:
-            "Hyperlipidemia (E78.5). Missing lipid panel result documentation.",
-          attachments: [
-            {
-              name: "Lab_Requisition.pdf",
-              type: "pdf",
-              date: "2024-05-26",
-              size: "0.1MB",
-              content:
-                "LAB ORDER\nTest: Lipid Panel (80061)\nResult: *[PENDING UPLOAD]*",
-            },
-          ],
-        },
-        {
-          id: "C-2013",
-          patientName: "Christopher Adams",
-          patientDob: "1982-05-05",
-          memberId: "MEM-110099",
-          gender: "Male",
-          provider: "City Hospital",
-          providerNpi: "1234567890",
-          facility: "City Hospital Urgent Care",
-          admissionDate: "2024-05-27",
-          claimType: "Professional",
-          diagnosisCode: "J20.9",
-          diagnosisDescription: "Acute bronchitis, unspecified",
-          procedureCode: "99214",
-          procedureDescription: "Outpatient visit Level 4",
-          amount: 300,
-          units: 1,
-          date: "2024-05-27",
-          status: "Approved",
-          riskScore: 6,
-          clinicalSummary:
-            "Acute Bronchitis (J20.9). Documentation supports complexity.",
-          attachments: [
-            {
-              name: "Visit_Summary.pdf",
-              type: "pdf",
-              date: "2024-05-27",
-              size: "0.4MB",
-              content:
-                "URGENT CARE VISIT\nPlan: Prescribe Prednisone burst + Azithromycin.\n*Level 4 (99214)* supported.",
-            },
-          ],
-        },
-        {
-          id: "C-2014",
-          patientName: "Jessica Turner",
-          patientDob: "1959-11-22",
-          memberId: "MEM-554433",
-          gender: "Female",
-          provider: "Regional Medical Center",
-          providerNpi: "9876543210",
-          facility: "Regional Cardiac Cath Lab",
-          admissionDate: "2024-05-27",
-          claimType: "Professional",
-          diagnosisCode: "I21.9",
-          diagnosisDescription: "Acute myocardial infarction, unspecified",
-          procedureCode: "92941",
-          procedureDescription: "Percutaneous Coronary Intervention",
-          amount: 18000,
-          units: 1,
-          date: "2024-05-27",
-          status: "Flagged",
-          riskScore: 89,
-          clinicalSummary:
-            "Acute MI (I21.9). Incorrect coding; Missing ECG evidence.",
-          attachments: [
-            {
-              name: "Cath_Report.pdf",
-              type: "pdf",
-              date: "2024-05-27",
-              size: "1.8MB",
-              content:
-                "CATHETERIZATION REPORT\nECG Findings: *[MISSING]*.\nClinical picture consistent with Unstable Angina, NOT Acute MI.\nCode should be 92928 (PCI w/ stent).",
-            },
-          ],
-        },
-        {
-          id: "C-2015",
-          patientName: "Daniel Harris",
-          patientDob: "1978-08-30",
-          memberId: "MEM-223344",
-          gender: "Male",
-          provider: "Metro General Hospital",
-          providerNpi: "1122334455",
-          facility: "Metro Radiology",
-          admissionDate: "2024-05-28",
-          claimType: "Professional",
-          diagnosisCode: "M54.5",
-          diagnosisDescription: "Low back pain",
-          procedureCode: "72100",
-          procedureDescription: "X-Ray Exam of Spine",
-          amount: 500,
-          units: 1,
-          date: "2024-05-28",
-          status: "In Review",
-          riskScore: 33,
-          clinicalSummary:
-            "Low Back Pain (M54.5). Incomplete radiology report.",
-          attachments: [
-            {
-              name: "Report_Draft.txt",
-              type: "doc",
-              date: "2024-05-28",
-              size: "0.01MB",
-              content:
-                "RADIOLOGY PRELIMINARY\nSigned by: *[UNSIGNED]* - Requires final radiologist signature.",
-            },
-          ],
-        },
-      ];
-
-      // MOCK ANALYSIS RESULTS for specific IDs (Enhanced)
-      const MOCK_ANALYSIS_RESULTS = {
-        "C-2003": {
-          idealDrg: "194",
-          idealDrgDesc: "Simple Pneumonia & Pleurisy w CC",
-          actualDrg: "193",
-          actualDrgDesc: "Simple Pneumonia & Pleurisy w MCC",
-          financialImpact: 7000,
-          rootCauses: [
-            {
-              title: "Upcoding Suspected",
-              desc: "No respiratory failure/sepsis.",
-              severity: "high",
-            },
-            {
-              title: "Missing Evidence",
-              desc: "Chest X-ray and Labs missing.",
-              severity: "medium",
-            },
-            {
-              title: "Identity Mismatch",
-              desc: "DOB Mismatch (1960 vs 1962).",
-              severity: "high",
-            },
-          ],
-          providerGuidance: [
-            {
-              action: "Attach Evidence",
-              detail: "Attach chest X-ray.",
-              icon: "doc",
-              rationale: "Imaging required for pneumonia validation.",
-              reference: "Clinical Policy IP-PN-24",
-            },
-            {
-              action: "Correct Demographics",
-              detail: "Correct DOB.",
-              icon: "review",
-              rationale: "Must match Master Patient Index.",
-              reference: "Admin Guide: Eligibility",
-            },
-            {
-              action: "Update Coding",
-              detail: "Update DRG to 194.",
-              icon: "code",
-              rationale: "Documentation does not support MCC.",
-              reference: "CMS DRG Definitions",
-            },
-          ],
-          confidence: 0.98,
-          actualLogic: "MCC pathway triggered on limited evidence",
-          idealLogic: "Plan policy + CMS DRG + LCD + contract",
-          actualEvidence: "Diagnosis + procedure codes + partial notes",
-          idealEvidence: "RT notes, labs, MD assessment reconciled to policy",
-          actualCompliance: "Potential overpayment vs policy & contract",
-          idealCompliance: "Aligned to policy, CMS & contract allowance",
-          gapAnalysis:
-            "CMS severity and plan policy thresholds not fully evaluated.",
-          keyDifferences: [
-            "Severity alignment: Twin recalculates severity against CMS / policy thresholds and determines MCC is not supported.",
-            "Evidence coverage: Twin reconciles medical record, policy, CMS DRG logic, and contract terms in one pass.",
-            "Financial impact: Overpayment risk of $7,000 on a single claim, intercepted prepay.",
-          ],
-        },
-        // Fallback for others - simplified
-        DEFAULT: {
-          idealDrg: "N/A",
-          idealDrgDesc: "N/A",
-          actualDrg: "N/A",
-          actualDrgDesc: "N/A",
-          financialImpact: 0,
-          rootCauses: [],
-          providerGuidance: [],
-          confidence: 0.95,
-          keyDifferences: [],
-        },
-      };
-
-      const FIXED_RESULT = {
-        ...MOCK_ANALYSIS_RESULTS["C-2003"],
-        actualDrg: "194",
-        actualDrgDesc: "Simple Pneumonia & Pleurisy w CC",
-        financialImpact: 0,
-        rootCauses: [],
-        guidance: [],
-        keyDifferences: [],
-      };
-
-      // --- STATE ---
-      let currentView = "dashboard";
-      let currentClaim = null;
-      let isClaimFixed = false;
-      let activeTab = "details";
-      let chartInstances = {};
-
-      // --- ROUTING & INIT ---
-      const router = {
-        navigate: (view, claimId = null, animate = false) => {
-          // Hide all views
-          document
-            .querySelectorAll("#main-container > div")
-            .forEach((el) => el.classList.add("hidden"));
-          document
-            .querySelectorAll("aside nav button")
-            .forEach(
-              (btn) =>
-                (btn.className = btn.className.replace(
-                  "bg-blue-600 text-white",
-                  "text-slate-400 hover:bg-slate-800 hover:text-white"
-                ))
-            );
-
-          if (view === "dashboard") {
-            document
-              .getElementById("view-dashboard")
-              .classList.remove("hidden");
-            document.getElementById("nav-dashboard").className = document
-              .getElementById("nav-dashboard")
-              .className.replace(
-                "text-slate-400 hover:bg-slate-800 hover:text-white",
-                "bg-blue-600 text-white"
-              );
-            initDashboardCharts();
-            renderTable();
-          } else if (view === "analytics") {
-            document
-              .getElementById("view-analytics")
-              .classList.remove("hidden");
-            document.getElementById("nav-analytics").className = document
-              .getElementById("nav-analytics")
-              .className.replace(
-                "text-slate-400 hover:bg-slate-800 hover:text-white",
-                "bg-blue-600 text-white"
-              );
-            initAnalyticsCharts();
-          } else if (view === "detail" && claimId) {
-            currentClaim = MOCK_CLAIMS.find((c) => c.id === claimId);
-            isClaimFixed = false; // Reset fixed state on new entry
-            document.getElementById("view-detail").classList.remove("hidden");
-            loadDetail(currentClaim, animate);
-          }
-          lucide.createIcons();
-        },
-      };
-
-      // --- DASHBOARD LOGIC ---
-      function toggleSimMenu() {
-        document.getElementById("sim-menu").classList.toggle("hidden");
-      }
-
-      function renderTable() {
-        const tbody = document.getElementById("claims-table-body");
-        tbody.innerHTML = MOCK_CLAIMS.map(
-          (claim) => `
-                <tr onclick="router.navigate('detail', '${
-                  claim.id
-                }', false)" class="hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-50">
-                    <td class="px-6 py-4 text-sm font-medium text-slate-900">${
-                      claim.id
-                    }<div class="text-xs text-slate-400 mt-1">${
-            claim.date
-          }</div></td>
-                    <td class="px-6 py-4 text-sm text-slate-600"><div class="font-medium text-slate-900">${
-                      claim.provider
-                    }</div><div class="text-xs text-slate-400">${
-            claim.patientName
-          }</div></td>
-                    <td class="px-6 py-4 text-sm text-slate-600"><div class="flex items-center gap-2 mb-1"><span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-xs text-slate-700 border border-slate-200">${
-                      claim.drgCode || claim.procedureCode
-                    }</span><span class="text-xs text-slate-500">${
-            claim.claimType
-          }</span></div><span class="truncate max-w-[150px] block text-xs">${
-            claim.drgDescription || claim.procedureDescription
-          }</span></td>
-                    <td class="px-6 py-4 text-sm font-medium text-slate-900">$${claim.amount.toLocaleString()}</td>
-                    <td class="px-6 py-4"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getRiskClass(
-                      claim.riskScore
-                    )}"><div class="w-1.5 h-1.5 rounded-full ${getRiskDot(
-            claim.riskScore
-          )}"></div>${getRiskLabel(claim.riskScore)}</div></td>
-                    <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${getStatusClass(
-                      claim.status
-                    )}">${claim.status}</span></td>
-                    <td class="px-6 py-4 text-right"><button class="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline">View</button></td>
-                </tr>
-            `
-        ).join("");
-
-        // Search filter
-        document
-          .getElementById("claim-search")
-          .addEventListener("input", (e) => {
-            const term = e.target.value.toLowerCase();
-            const rows = tbody.getElementsByTagName("tr");
-            Array.from(rows).forEach((row) => {
-              const text = row.innerText.toLowerCase();
-              row.style.display = text.includes(term) ? "" : "none";
-            });
-          });
-      }
-
-      function getRiskClass(score) {
-        if (score > 80) return "bg-red-50 text-red-700 border-red-100";
-        if (score > 30) return "bg-yellow-50 text-yellow-700 border-yellow-100";
-        return "bg-green-50 text-green-700 border-green-100";
-      }
-      function getRiskDot(score) {
-        if (score > 80) return "bg-red-500";
-        if (score > 30) return "bg-yellow-500";
-        return "bg-green-500";
-      }
-      function getRiskLabel(score) {
-        if (score > 80) return "High Risk";
-        if (score > 30) return "Low Risk";
-        return "No Risk";
-      }
-      function getStatusClass(status) {
-        if (status === "Approved") return "bg-green-100 text-green-800";
-        if (status === "Flagged") return "bg-red-100 text-red-800";
-        return "bg-yellow-100 text-yellow-800";
-      }
-
-      function startSimulation(type) {
-        toggleSimMenu();
-        const overlay = document.getElementById("simulation-overlay");
-        const bar = document.getElementById("sim-progress-bar");
-        const txt = document.getElementById("sim-progress-text");
-        overlay.classList.remove("hidden");
-
-        let progress = 0;
-        const interval = setInterval(() => {
-          progress += 2;
-          bar.style.width = `${progress}%`;
-          txt.innerText = `${progress}%`;
-          if (progress >= 100) {
-            clearInterval(interval);
-            setTimeout(() => {
-              overlay.classList.add("hidden");
-              // Find a suitable claim or default to C-2003 for high risk demo
-              let targetId = "C-2001";
-              if (type === "High Risk") targetId = "C-2003";
-              if (type === "Low Risk") targetId = "C-2002";
-              router.navigate("detail", targetId, true);
-            }, 500);
-          }
-        }, 30);
-      }
-
-      // --- CHARTS ---
-      function initDashboardCharts() {
-        if (chartInstances.trend) chartInstances.trend.destroy();
-        if (chartInstances.provider) chartInstances.provider.destroy();
-
-        const ctx1 = document.getElementById("trendChart").getContext("2d");
-        chartInstances.trend = new Chart(ctx1, {
-          type: "line",
-          data: {
-            labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-            datasets: [
-              {
-                label: "No Risk",
-                data: [145, 152, 148, 160, 155, 142, 138],
-                borderColor: "#10b981",
-                tension: 0.4,
-              },
-              {
-                label: "Low Risk",
-                data: [42, 38, 45, 40, 48, 44, 42],
-                borderColor: "#f59e0b",
-                tension: 0.4,
-              },
-              {
-                label: "High Risk",
-                data: [12, 15, 14, 18, 16, 12, 10],
-                borderColor: "#ef4444",
-                tension: 0.4,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { position: "bottom" } },
-            scales: {
-              y: { beginAtZero: true, grid: { display: false } },
-              x: { grid: { display: false } },
-            },
-          },
-        });
-
-        const ctx2 = document.getElementById("providerChart").getContext("2d");
-        chartInstances.provider = new Chart(ctx2, {
-          type: "bar",
-          data: {
-            labels: [
-              "St. Mary's",
-              "City Medical",
-              "Regional",
-              "Valley Care",
-              "Metro",
-            ],
-            datasets: [
-              {
-                label: "High Risk Claims",
-                data: [28, 22, 18, 12, 9],
-                backgroundColor: "#ef4444",
-                borderRadius: 4,
-              },
-            ],
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-              y: { beginAtZero: true },
-              x: { grid: { display: false } },
-            },
-          },
-        });
-      }
-
-      function initAnalyticsCharts() {
-        if (chartInstances.analyticsBar) chartInstances.analyticsBar.destroy();
-        if (chartInstances.analyticsPie) chartInstances.analyticsPie.destroy();
-
-        const ctx1 = document
-          .getElementById("analyticsBarChart")
-          .getContext("2d");
-        chartInstances.analyticsBar = new Chart(ctx1, {
-          type: "bar",
-          data: {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-            datasets: [
-              {
-                label: "Recovered ($)",
-                data: [4000, 3000, 2000, 2780, 1890, 2390],
-                backgroundColor: "#3b82f6",
-              },
-              {
-                label: "Risk ($)",
-                data: [2400, 1398, 9800, 3908, 4800, 3800],
-                backgroundColor: "#cbd5e1",
-              },
-            ],
-          },
-          options: { responsive: true, maintainAspectRatio: false },
-        });
-
-        const ctx2 = document
-          .getElementById("analyticsPieChart")
-          .getContext("2d");
-        chartInstances.analyticsPie = new Chart(ctx2, {
-          type: "doughnut",
-          data: {
-            labels: [
-              "Coding Error",
-              "Missing Docs",
-              "Policy Breach",
-              "Duplicate",
-            ],
-            datasets: [
-              {
-                data: [40, 30, 20, 10],
-                backgroundColor: ["#3b82f6", "#10b981", "#f59e0b", "#ef4444"],
-              },
-            ],
-          },
-          options: { responsive: true, maintainAspectRatio: false },
-        });
-      }
-
-      // --- DETAIL VIEW LOGIC ---
-      function loadDetail(claim, animate) {
-        const overlay = document.getElementById("analysis-overlay");
-        const stepsContainer = document.getElementById("analysis-steps");
-        const steps = [
-          "Validating claim against payer policies...",
-          "Analyzing EHR documents for clinical detail...",
-          "Checking contract terms and plan coverage...",
-          "Detecting anomalies and mismatches...",
-          "Summarizing analysis results...",
+        // --- DATA CONSTANTS ---
+        const ATTACHMENTS = {
+            'C-2003': [
+                { name: 'Admission_FaceSheet.pdf', type: 'pdf', date: '2024-05-18', content: "ADMISSION FACESHEET\nPatient: David Lee\n*DOB: 03/15/1962*  <-- [MISMATCH: Claim says 1960]\nAdmit Date: 05/18/2024" },
+                { name: 'Progress_Notes.pdf', type: 'pdf', date: '2024-05-19', content: "INPATIENT PROGRESS NOTE\nVitals: Temp 98.6, HR 72, BP 120/80, RR 16, SpO2 98% on Room Air.\nNOTE: *No criteria for Sepsis or Severe Respiratory Failure met*. Patient stable." }
+            ]
+        };
+        // Generate mock data for all 15 claims
+        const MOCK_CLAIMS = [
+            { id: 'C-2001', patientName: 'John Smith', patientDob: '1980-04-12', memberId: 'MEM-882910', gender: 'Male', provider: 'City Hospital', providerNpi: '1234567890', facility: 'City Hospital Main Campus', admissionDate: '2024-05-18', dischargeDate: '2024-05-20', claimType: 'Facility DRG', diagnosisCode: 'J18.9', diagnosisDescription: 'Pneumonia, unspecified organism', procedureCode: '99223', procedureDescription: 'Initial hospital care', drgCode: '194', drgDescription: 'Simple Pneumonia & Pleurisy w CC', amount: 12000, units: 1, modifiers: [], date: '2024-05-20', status: 'Approved', riskScore: 5, clinicalSummary: "Admission note confirms pneumonia diagnosis (J18.9). Procedure 99223. No issues.", attachments: [{name: 'Admission_Note.pdf', type: 'pdf', date: '2024-05-18', size: '1.2MB', content: "ADMISSION H&P\nPatient: John Smith\nDate: 05/18/2024\nAssessment: Community Acquired Pneumonia (J18.9).\nPlan: Admit to Medical Floor. Start Ceftriaxone."}] },
+            { id: 'C-2002', patientName: 'Sarah Johnson', patientDob: '1975-08-22', memberId: 'MEM-445102', gender: 'Female', provider: 'Regional Medical Center', providerNpi: '9876543210', facility: 'Regional Med Center Outpatient', admissionDate: '2024-05-21', dischargeDate: '2024-05-21', claimType: 'Professional', diagnosisCode: 'I10', diagnosisDescription: 'Essential (primary) hypertension', procedureCode: '99213', procedureDescription: 'Office/outpatient visit est', amount: 250, units: 1, modifiers: ['25'], date: '2024-05-21', status: 'In Review', riskScore: 35, clinicalSummary: "Hypertension (I10). Missing lab result (BMP) in documentation.", attachments: [{name: 'Office_Visit_Note.pdf', type: 'pdf', date: '2024-05-21', size: '0.5MB', content: "OFFICE VISIT\nAssessment: Essential Hypertension (I10).\nPlan: *Reviewed lab results drawn today (BMP)* - [NOT ATTACHED]."}] },
+            { id: 'C-2003', patientName: 'David Lee', patientDob: '1960-03-15', memberId: 'MEM-112233', gender: 'Male', provider: 'Metro General Hospital', providerNpi: '1122334455', facility: 'Metro General Inpatient Wing', admissionDate: '2024-05-18', dischargeDate: '2024-05-22', claimType: 'Facility DRG', diagnosisCode: 'J18.9', diagnosisDescription: 'Pneumonia, unspecified organism', procedureCode: '99223', procedureDescription: 'Initial hospital care', drgCode: '193', drgDescription: 'Simple Pneumonia & Pleurisy w MCC', amount: 19000, units: 1, modifiers: [], date: '2024-05-22', status: 'Flagged', riskScore: 92, clinicalSummary: "Pneumonia (J18.9). Upcoding suspected; Missing clinical evidence; Patient DOB mismatch.", attachments: ATTACHMENTS['C-2003'] },
+            { id: 'C-2004', patientName: 'Maria Gonzalez', patientDob: '1985-11-05', memberId: 'MEM-998877', gender: 'Female', provider: 'Sunrise Clinic', providerNpi: '5566778899', facility: 'Sunrise Clinic Lab', admissionDate: '2024-05-22', claimType: 'Professional', diagnosisCode: 'E11.9', diagnosisDescription: 'Type 2 diabetes mellitus w/o complications', procedureCode: '83036', procedureDescription: 'Hemoglobin A1C Level', amount: 150, units: 1, date: '2024-05-22', status: 'Approved', riskScore: 2, clinicalSummary: "Diabetes screening (E11.9). Documentation aligns with code.", attachments: [{name: 'Lab_Results.pdf', type: 'pdf', date: '2024-05-22', size: '0.4MB', content: "LAB RESULTS\nTest: Hemoglobin A1c\nResult: 6.8%"}] },
+            { id: 'C-2005', patientName: 'James Carter', patientDob: '1955-06-30', memberId: 'MEM-334455', gender: 'Male', provider: 'Lakeside Hospital', providerNpi: '6677889900', facility: 'Lakeside Cardiac Center', admissionDate: '2024-05-23', claimType: 'Professional', diagnosisCode: 'I25.10', diagnosisDescription: 'Atherosclerotic heart disease', procedureCode: '92928', procedureDescription: 'Stent Placement', amount: 15000, units: 1, modifiers: ['LC'], date: '2024-05-23', status: 'Flagged', riskScore: 88, clinicalSummary: "Coronary Atherosclerosis (I25.10). Incorrect coding; Missing cath lab report.", attachments: [{name: 'Op_Report_Draft.doc', type: 'doc', date: '2024-05-23', size: '0.1MB', content: "OPERATIVE NOTE (DRAFT)\nIntervention: *DES deployed to mid-LAD*.\nCoding Note: Provider billed 92928-LC (Left Circumflex). Documentation supports LAD only.\n*PENDING FINAL CATH LAB REPORT*"}] },
+            { id: 'C-2006', patientName: 'Emily Davis', patientDob: '1990-01-15', memberId: 'MEM-221100', gender: 'Female', provider: 'Northside Medical', providerNpi: '7788990011', facility: 'Northside Pulmonology', admissionDate: '2024-05-23', claimType: 'Professional', diagnosisCode: 'J45.909', diagnosisDescription: 'Unspecified asthma, uncomplicated', procedureCode: '94640', procedureDescription: 'Airway Inhalation Treatment', amount: 400, units: 2, date: '2024-05-23', status: 'In Review', riskScore: 40, clinicalSummary: "Asthma (J45.909). Incomplete spirometry documentation.", attachments: [{name: 'Clinic_Note.pdf', type: 'pdf', date: '2024-05-23', size: '0.6MB', content: "PULMONARY CLINIC NOTE\nPlan: Spirometry performed.\n*[SPIROMETRY DATA FIELD BLANK]*"}] },
+            { id: 'C-2007', patientName: 'Robert Brown', patientDob: '2001-09-09', memberId: 'MEM-774411', gender: 'Male', provider: 'City Hospital', providerNpi: '1234567890', facility: 'City Hospital Surgery Center', admissionDate: '2024-05-24', dischargeDate: '2024-05-25', claimType: 'Facility DRG', diagnosisCode: 'K35.80', diagnosisDescription: 'Unspecified acute appendicitis', procedureCode: '44950', procedureDescription: 'Appendectomy', amount: 8000, units: 1, date: '2024-05-24', status: 'Approved', riskScore: 4, clinicalSummary: "Acute Appendicitis (K35.80). Documentation complete.", attachments: [{name: 'Surgical_Report.pdf', type: 'pdf', date: '2024-05-24', size: '1.5MB', content: "OPERATIVE REPORT\nFindings: *Inflamed, non-perforated appendix identified*."}] },
+            { id: 'C-2008', patientName: 'Linda White', patientDob: '1948-12-01', memberId: 'MEM-665544', gender: 'Female', provider: 'Regional Medical Center', providerNpi: '9876543210', facility: 'Regional Stroke Unit', admissionDate: '2024-05-20', dischargeDate: '2024-05-24', claimType: 'Facility DRG', diagnosisCode: 'I63.9', diagnosisDescription: 'Cerebral infarction, unspecified', procedureCode: '99223', procedureDescription: 'Initial hospital care', drgCode: '061', drgDescription: 'Ischemic Stroke w Use of Thrombolytic Agent w MCC', amount: 22000, units: 1, date: '2024-05-24', status: 'Flagged', riskScore: 95, clinicalSummary: "Stroke (I63.9). Upcoding suspected; Missing neuroimaging evidence.", attachments: [{name: 'Discharge_Summary.pdf', type: 'pdf', date: '2024-05-24', size: '1.1MB', content: "DISCHARGE SUMMARY\n*tPA was NOT administered due to time window*.\nCoding Query: DRG 061 billed (Use of Thrombolytic Agent). Correct DRG should be 062/065."}] },
+            { id: 'C-2009', patientName: 'Michael Green', patientDob: '1965-04-20', memberId: 'MEM-332211', gender: 'Male', provider: 'Metro General Hospital', providerNpi: '1122334455', facility: 'Metro Dialysis Center', admissionDate: '2024-05-25', claimType: 'Professional', diagnosisCode: 'N18.6', diagnosisDescription: 'End stage renal disease', procedureCode: '90935', procedureDescription: 'Hemodialysis Procedure', amount: 600, units: 1, date: '2024-05-25', status: 'In Review', riskScore: 30, clinicalSummary: "ESRD (N18.6). Missing dialysis session note.", attachments: [{name: 'Billing_Face_Sheet.pdf', type: 'pdf', date: '2024-05-25', size: '0.2MB', content: "BILLING FACE SHEET\nCode: 90935.\nNote: *Session Log missing from packet*."}] },
+            { id: 'C-2010', patientName: 'Patricia Hall', patientDob: '1995-07-17', memberId: 'MEM-009988', gender: 'Female', provider: 'Sunrise Clinic', providerNpi: '5566778899', facility: 'Sunrise Urgent Care', admissionDate: '2024-05-25', claimType: 'Professional', diagnosisCode: 'J06.9', diagnosisDescription: 'Acute upper respiratory infection', procedureCode: '99212', procedureDescription: 'Outpatient visit Level 2', amount: 120, units: 1, date: '2024-05-25', status: 'Approved', riskScore: 1, clinicalSummary: "Upper Resp Infection (J06.9). Documentation supports Level 2.", attachments: [{name: 'Encounter_Note.pdf', type: 'pdf', date: '2024-05-25', size: '0.3MB', content: "URGENT CARE NOTE\nDx: URI.\nLevel of Service: *99212* (Straightforward decision making)."}] },
+            { id: 'C-2011', patientName: 'William King', patientDob: '1950-02-28', memberId: 'MEM-776655', gender: 'Male', provider: 'Lakeside Hospital', providerNpi: '6677889900', facility: 'Lakeside Oncology', admissionDate: '2024-05-26', claimType: 'Professional', diagnosisCode: 'C50.919', diagnosisDescription: 'Malignant neoplasm of unsp site of unspecified breast', procedureCode: '19307', procedureDescription: 'Mastectomy, Modified Radical', amount: 9000, units: 1, modifiers: ['RT'], date: '2024-05-26', status: 'Flagged', riskScore: 90, clinicalSummary: "Breast Cancer (C50.919). Incorrect coding; Missing pathology report.", attachments: [{name: 'Op_Note.pdf', type: 'pdf', date: '2024-05-26', size: '1.4MB', content: "OPERATIVE NOTE\nBilled: 19307.\nProcedure: Simple Mastectomy.\n*No axillary lymph node dissection performed*.\nCorrect Code should be 19303."}] },
+            { id: 'C-2012', patientName: 'Barbara Scott', patientDob: '1970-10-10', memberId: 'MEM-443322', gender: 'Female', provider: 'Northside Medical', providerNpi: '7788990011', facility: 'Northside Lab', admissionDate: '2024-05-26', claimType: 'Professional', diagnosisCode: 'E78.5', diagnosisDescription: 'Hyperlipidemia, unspecified', procedureCode: '80061', procedureDescription: 'Lipid Panel', amount: 200, units: 1, date: '2024-05-26', status: 'In Review', riskScore: 28, clinicalSummary: "Hyperlipidemia (E78.5). Missing lipid panel result documentation.", attachments: [{name: 'Lab_Requisition.pdf', type: 'pdf', date: '2024-05-26', size: '0.1MB', content: "LAB ORDER\nTest: Lipid Panel (80061)\nResult: *[PENDING UPLOAD]*"}] },
+            { id: 'C-2013', patientName: 'Christopher Adams', patientDob: '1982-05-05', memberId: 'MEM-110099', gender: 'Male', provider: 'City Hospital', providerNpi: '1234567890', facility: 'City Hospital Urgent Care', admissionDate: '2024-05-27', claimType: 'Professional', diagnosisCode: 'J20.9', diagnosisDescription: 'Acute bronchitis, unspecified', procedureCode: '99214', procedureDescription: 'Outpatient visit Level 4', amount: 300, units: 1, date: '2024-05-27', status: 'Approved', riskScore: 6, clinicalSummary: "Acute Bronchitis (J20.9). Documentation supports complexity.", attachments: [{name: 'Visit_Summary.pdf', type: 'pdf', date: '2024-05-27', size: '0.4MB', content: "URGENT CARE VISIT\nPlan: Prescribe Prednisone burst + Azithromycin.\n*Level 4 (99214)* supported."}] },
+            { id: 'C-2014', patientName: 'Jessica Turner', patientDob: '1959-11-22', memberId: 'MEM-554433', gender: 'Female', provider: 'Regional Medical Center', providerNpi: '9876543210', facility: 'Regional Cardiac Cath Lab', admissionDate: '2024-05-27', claimType: 'Professional', diagnosisCode: 'I21.9', diagnosisDescription: 'Acute myocardial infarction, unspecified', procedureCode: '92941', procedureDescription: 'Percutaneous Coronary Intervention', amount: 18000, units: 1, date: '2024-05-27', status: 'Flagged', riskScore: 89, clinicalSummary: "Acute MI (I21.9). Incorrect coding; Missing ECG evidence.", attachments: [{name: 'Cath_Report.pdf', type: 'pdf', date: '2024-05-27', size: '1.8MB', content: "CATHETERIZATION REPORT\nECG Findings: *[MISSING]*.\nClinical picture consistent with Unstable Angina, NOT Acute MI.\nCode should be 92928 (PCI w/ stent)."}] },
+            { id: 'C-2015', patientName: 'Daniel Harris', patientDob: '1978-08-30', memberId: 'MEM-223344', gender: 'Male', provider: 'Metro General Hospital', providerNpi: '1122334455', facility: 'Metro Radiology', admissionDate: '2024-05-28', claimType: 'Professional', diagnosisCode: 'M54.5', diagnosisDescription: 'Low back pain', procedureCode: '72100', procedureDescription: 'X-Ray Exam of Spine', amount: 500, units: 1, date: '2024-05-28', status: 'In Review', riskScore: 33, clinicalSummary: "Low Back Pain (M54.5). Incomplete radiology report.", attachments: [{name: 'Report_Draft.txt', type: 'doc', date: '2024-05-28', size: '0.01MB', content: "RADIOLOGY PRELIMINARY\nSigned by: *[UNSIGNED]* - Requires final radiologist signature."}] }
         ];
 
-        // Render Header
-        renderHeader(claim);
-        // Render initial tab
-        switchTab("details");
+        // MOCK ANALYSIS RESULTS for specific IDs (Enhanced)
+        const MOCK_ANALYSIS_RESULTS = {
+            'C-2003': {
+                idealDrg: '194', idealDrgDesc: 'Simple Pneumonia & Pleurisy w CC',
+                actualDrg: '193', actualDrgDesc: 'Simple Pneumonia & Pleurisy w MCC',
+                financialImpact: 7000,
+                rootCauses: [
+                    {title: 'Upcoding Suspected', desc: 'No respiratory failure/sepsis.', severity: 'high'},
+                    {title: 'Missing Evidence', desc: 'Chest X-ray and Labs missing.', severity: 'medium'},
+                    {title: 'Identity Mismatch', desc: 'DOB Mismatch (1960 vs 1962).', severity: 'high'}
+                ],
+                providerGuidance: [
+                    {action: 'Attach Evidence', detail: 'Attach chest X-ray.', icon: 'doc', rationale: 'Imaging required for pneumonia validation.', reference: 'Clinical Policy IP-PN-24'},
+                    {action: 'Correct Demographics', detail: 'Correct DOB.', icon: 'review', rationale: 'Must match Master Patient Index.', reference: 'Admin Guide: Eligibility'},
+                    {action: 'Update Coding', detail: 'Update DRG to 194.', icon: 'code', rationale: 'Documentation does not support MCC.', reference: 'CMS DRG Definitions'}
+                ],
+                confidence: 0.98,
+                actualLogic: "MCC pathway triggered on limited evidence",
+                idealLogic: "Plan policy + CMS DRG + LCD + contract",
+                actualEvidence: "Diagnosis + procedure codes + partial notes",
+                idealEvidence: "RT notes, labs, MD assessment reconciled to policy",
+                actualCompliance: "Potential overpayment vs policy & contract",
+                idealCompliance: "Aligned to policy, CMS & contract allowance",
+                gapAnalysis: "CMS severity and plan policy thresholds not fully evaluated.",
+                keyDifferences: [
+                    "Severity alignment: Twin recalculates severity against CMS / policy thresholds and determines MCC is not supported.",
+                    "Evidence coverage: Twin reconciles medical record, policy, CMS DRG logic, and contract terms in one pass.",
+                    "Financial impact: Overpayment risk of $7,000 on a single claim, intercepted prepay."
+                ]
+            },
+            // Fallback for others - simplified
+            'DEFAULT': {
+                idealDrg: 'N/A', idealDrgDesc: 'N/A',
+                actualDrg: 'N/A', actualDrgDesc: 'N/A',
+                financialImpact: 0,
+                rootCauses: [],
+                providerGuidance: [],
+                confidence: 0.95,
+                keyDifferences: []
+            }
+        };
 
-        if (animate) {
-          overlay.classList.remove("hidden");
-          overlay.classList.add("flex");
-          stepsContainer.innerHTML = steps
-            .map(
-              (s, i) => `
+        const FIXED_RESULT = {
+            ...MOCK_ANALYSIS_RESULTS['C-2003'],
+            actualDrg: '194', actualDrgDesc: 'Simple Pneumonia & Pleurisy w CC',
+            financialImpact: 0,
+            rootCauses: [],
+            guidance: [],
+            keyDifferences: []
+        };
+
+        // --- STATE ---
+        let currentView = 'dashboard';
+        let currentClaim = null;
+        let isClaimFixed = false;
+        let activeTab = 'details';
+        let chartInstances = {};
+        let selectedAttachmentIndex = 0;
+
+        // --- ROUTING & INIT ---
+        const router = {
+            navigate: (view, claimId = null, animate = false) => {
+                // Hide all views
+                document.querySelectorAll('#main-container > div').forEach(el => el.classList.add('hidden'));
+                document.querySelectorAll('aside nav button').forEach(btn => btn.className = btn.className.replace('bg-blue-600 text-white', 'text-slate-400 hover:bg-slate-800 hover:text-white'));
+
+                if (view === 'dashboard') {
+                    document.getElementById('view-dashboard').classList.remove('hidden');
+                    document.getElementById('nav-dashboard').className = document.getElementById('nav-dashboard').className.replace('text-slate-400 hover:bg-slate-800 hover:text-white', 'bg-blue-600 text-white');
+                    initDashboardCharts();
+                    renderTable();
+                } else if (view === 'analytics') {
+                    document.getElementById('view-analytics').classList.remove('hidden');
+                    document.getElementById('nav-analytics').className = document.getElementById('nav-analytics').className.replace('text-slate-400 hover:bg-slate-800 hover:text-white', 'bg-blue-600 text-white');
+                    initAnalyticsCharts();
+                } else if (view === 'detail' && claimId) {
+                    currentClaim = MOCK_CLAIMS.find(c => c.id === claimId);
+                    isClaimFixed = false; // Reset fixed state on new entry
+                    selectedAttachmentIndex = 0; // Reset attachment selection
+                    document.getElementById('view-detail').classList.remove('hidden');
+                    loadDetail(currentClaim, animate);
+                }
+                lucide.createIcons();
+            }
+        };
+
+        // --- DASHBOARD LOGIC ---
+        function toggleSimMenu() {
+            document.getElementById('sim-menu').classList.toggle('hidden');
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('claims-table-body');
+            tbody.innerHTML = MOCK_CLAIMS.map(claim => `
+                <tr onclick="router.navigate('detail', '${claim.id}', false)" class="hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-50">
+                    <td class="px-6 py-4 text-sm font-medium text-slate-900">${claim.id}<div class="text-xs text-slate-400 mt-1">${claim.date}</div></td>
+                    <td class="px-6 py-4 text-sm text-slate-600"><div class="font-medium text-slate-900">${claim.provider}</div><div class="text-xs text-slate-400">${claim.patientName}</div></td>
+                    <td class="px-6 py-4 text-sm text-slate-600"><div class="flex items-center gap-2 mb-1"><span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded text-xs text-slate-700 border border-slate-200">${claim.drgCode || claim.procedureCode}</span><span class="text-xs text-slate-500">${claim.claimType}</span></div><span class="truncate max-w-[150px] block text-xs">${claim.drgDescription || claim.procedureDescription}</span></td>
+                    <td class="px-6 py-4 text-sm font-medium text-slate-900">$${claim.amount.toLocaleString()}</td>
+                    <td class="px-6 py-4"><div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${getRiskClass(claim.riskScore)}"><div class="w-1.5 h-1.5 rounded-full ${getRiskDot(claim.riskScore)}"></div>${getRiskLabel(claim.riskScore)}</div></td>
+                    <td class="px-6 py-4"><span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium ${getStatusClass(claim.status)}">${claim.status}</span></td>
+                    <td class="px-6 py-4 text-right"><button class="text-blue-600 hover:text-blue-800 text-sm font-medium hover:underline">View</button></td>
+                </tr>
+            `).join('');
+            
+            // Search filter
+            document.getElementById('claim-search').addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const rows = tbody.getElementsByTagName('tr');
+                Array.from(rows).forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
+        }
+
+        function getRiskClass(score) {
+            if (score > 80) return 'bg-red-50 text-red-700 border-red-100';
+            if (score > 30) return 'bg-yellow-50 text-yellow-700 border-yellow-100';
+            return 'bg-green-50 text-green-700 border-green-100';
+        }
+        function getRiskDot(score) {
+            if (score > 80) return 'bg-red-500';
+            if (score > 30) return 'bg-yellow-500';
+            return 'bg-green-500';
+        }
+        function getRiskLabel(score) {
+            if (score > 80) return 'High Risk';
+            if (score > 30) return 'Low Risk';
+            return 'No Risk';
+        }
+        function getStatusClass(status) {
+            if (status === 'Approved') return 'bg-green-100 text-green-800';
+            if (status === 'Flagged') return 'bg-red-100 text-red-800';
+            return 'bg-yellow-100 text-yellow-800';
+        }
+
+        function startSimulation(type) {
+            toggleSimMenu();
+            const overlay = document.getElementById('simulation-overlay');
+            const bar = document.getElementById('sim-progress-bar');
+            const txt = document.getElementById('sim-progress-text');
+            overlay.classList.remove('hidden');
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 2;
+                bar.style.width = `${progress}%`;
+                txt.innerText = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        // Find a suitable claim or default to C-2003 for high risk demo
+                        let targetId = 'C-2001';
+                        if (type === 'High Risk') targetId = 'C-2003';
+                        if (type === 'Low Risk') targetId = 'C-2002';
+                        router.navigate('detail', targetId, true);
+                    }, 500);
+                }
+            }, 30);
+        }
+
+        // --- CHARTS ---
+        function initDashboardCharts() {
+            if (chartInstances.trend) chartInstances.trend.destroy();
+            if (chartInstances.provider) chartInstances.provider.destroy();
+
+            const ctx1 = document.getElementById('trendChart').getContext('2d');
+            chartInstances.trend = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        { label: 'No Risk', data: [145,152,148,160,155,142,138], borderColor: '#10b981', tension: 0.4 },
+                        { label: 'Low Risk', data: [42,38,45,40,48,44,42], borderColor: '#f59e0b', tension: 0.4 },
+                        { label: 'High Risk', data: [12,15,14,18,16,12,10], borderColor: '#ef4444', tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
+            });
+
+            const ctx2 = document.getElementById('providerChart').getContext('2d');
+            chartInstances.provider = new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ["St. Mary's", "City Medical", "Regional", "Valley Care", "Metro"],
+                    datasets: [{ label: 'High Risk Claims', data: [28, 22, 18, 12, 9], backgroundColor: '#ef4444', borderRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true }, x: { grid: { display: false } } } }
+            });
+        }
+
+        function initAnalyticsCharts() {
+            if (chartInstances.analyticsBar) chartInstances.analyticsBar.destroy();
+            if (chartInstances.analyticsPie) chartInstances.analyticsPie.destroy();
+
+            const ctx1 = document.getElementById('analyticsBarChart').getContext('2d');
+            chartInstances.analyticsBar = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+                    datasets: [
+                        { label: 'Recovered ($)', data: [4000,3000,2000,2780,1890,2390], backgroundColor: '#3b82f6' },
+                        { label: 'Risk ($)', data: [2400,1398,9800,3908,4800,3800], backgroundColor: '#cbd5e1' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            const ctx2 = document.getElementById('analyticsPieChart').getContext('2d');
+            chartInstances.analyticsPie = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Coding Error', 'Missing Docs', 'Policy Breach', 'Duplicate'],
+                    datasets: [{ data: [40, 30, 20, 10], backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // --- DETAIL VIEW LOGIC ---
+        function loadDetail(claim, animate) {
+            // Reset attachment selection on load
+            selectedAttachmentIndex = 0;
+            const overlay = document.getElementById('analysis-overlay');
+            const stepsContainer = document.getElementById('analysis-steps');
+            const steps = [
+                "Validating claim against payer policies...",
+                "Analyzing EHR documents for clinical detail...",
+                "Checking contract terms and plan coverage...",
+                "Detecting anomalies and mismatches...",
+                "Summarizing analysis results..."
+            ];
+
+            // Render Header
+            renderHeader(claim);
+            // Render initial tab
+            switchTab('details');
+
+            if (animate) {
+                overlay.classList.remove('hidden');
+                overlay.classList.add('flex');
+                stepsContainer.innerHTML = steps.map((s, i) => `
                     <div id="step-${i}" class="flex items-center gap-4 opacity-40 transition-opacity duration-300">
                         <div class="w-6 h-6 rounded-full border-2 border-slate-200 flex items-center justify-center text-xs text-transparent transition-all duration-300 step-icon">
                             <i data-lucide="check" class="w-3 h-3"></i>
                         </div>
                         <p class="text-sm font-medium text-slate-400 transition-all step-text">${s}</p>
                     </div>
-                `
-            )
-            .join("");
-          lucide.createIcons();
+                `).join('');
+                lucide.createIcons();
 
-          let currentStep = 0;
-          const stepInterval = setInterval(() => {
-            if (currentStep < steps.length) {
-              const row = document.getElementById(`step-${currentStep}`);
-              const icon = row.querySelector(".step-icon");
-              const text = row.querySelector(".step-text");
+                let currentStep = 0;
+                const stepInterval = setInterval(() => {
+                    if (currentStep < steps.length) {
+                        const row = document.getElementById(`step-${currentStep}`);
+                        const icon = row.querySelector('.step-icon');
+                        const text = row.querySelector('.step-text');
+                        
+                        row.classList.remove('opacity-40');
+                        icon.className = "w-6 h-6 rounded-full flex items-center justify-center text-xs bg-blue-600 border-blue-600 text-white animate-pulse shadow-md scale-110 transition-all duration-300 step-icon";
+                        text.className = "text-sm font-bold text-blue-600 transition-all step-text";
 
-              row.classList.remove("opacity-40");
-              icon.className =
-                "w-6 h-6 rounded-full flex items-center justify-center text-xs bg-blue-600 border-blue-600 text-white animate-pulse shadow-md scale-110 transition-all duration-300 step-icon";
-              text.className =
-                "text-sm font-bold text-blue-600 transition-all step-text";
-
-              // Mark previous as done
-              if (currentStep > 0) {
-                const prevRow = document.getElementById(
-                  `step-${currentStep - 1}`
-                );
-                const prevIcon = prevRow.querySelector(".step-icon");
-                prevIcon.className =
-                  "w-6 h-6 rounded-full flex items-center justify-center text-xs bg-green-500 border-green-500 text-white shadow-md scale-100 transition-all duration-300";
-                prevRow.querySelector(".step-text").className =
-                  "text-sm font-medium text-slate-900";
-              }
-              currentStep++;
-            } else {
-              clearInterval(stepInterval);
-              setTimeout(() => {
-                overlay.classList.add("hidden");
-                overlay.classList.remove("flex");
-                // If risk detected, switch to Twin tab automatically
-                if (claim.riskScore > 50) switchTab("twin");
-              }, 800);
-            }
-          }, 800);
-        } else {
-          overlay.classList.add("hidden");
-          overlay.classList.remove("flex");
-          if (claim.riskScore > 50) switchTab("twin");
-        }
-      }
-
-      function renderHeader(claim) {
-        const result = isClaimFixed
-          ? FIXED_RESULT
-          : MOCK_ANALYSIS_RESULTS[claim.id] || MOCK_ANALYSIS_RESULTS["DEFAULT"];
-        const isHighRisk = !isClaimFixed && result.financialImpact > 0;
-
-        document.getElementById("detail-title").innerHTML = `
-                Claim Audit: ${claim.id} 
-                <span class="px-2 py-0.5 rounded text-xs font-bold ${
-                  isClaimFixed
-                    ? "bg-green-100 text-green-700 border-green-200"
-                    : isHighRisk
-                    ? "bg-red-100 text-red-700 border-red-200"
-                    : "bg-green-100 text-green-700 border-green-200"
-                } border tracking-wide uppercase">
-                    ${
-                      isClaimFixed
-                        ? "Clean Claim"
-                        : isHighRisk
-                        ? "High Risk Detected"
-                        : "No Risk Detected"
+                        // Mark previous as done
+                        if (currentStep > 0) {
+                            const prevRow = document.getElementById(`step-${currentStep-1}`);
+                            const prevIcon = prevRow.querySelector('.step-icon');
+                            prevIcon.className = "w-6 h-6 rounded-full flex items-center justify-center text-xs bg-green-500 border-green-500 text-white shadow-md scale-100 transition-all duration-300";
+                            prevRow.querySelector('.step-text').className = "text-sm font-medium text-slate-900";
+                        }
+                        currentStep++;
+                    } else {
+                        clearInterval(stepInterval);
+                        setTimeout(() => {
+                            overlay.classList.add('hidden');
+                            overlay.classList.remove('flex');
+                            // If risk detected, switch to Twin tab automatically
+                            if (claim.riskScore > 50) switchTab('twin');
+                        }, 800);
                     }
+                }, 800);
+            } else {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                if (claim.riskScore > 50) switchTab('twin');
+            }
+        }
+
+        function renderHeader(claim) {
+            const result = (isClaimFixed) ? FIXED_RESULT : (MOCK_ANALYSIS_RESULTS[claim.id] || MOCK_ANALYSIS_RESULTS['DEFAULT']);
+            const isHighRisk = !isClaimFixed && result.financialImpact > 0;
+            
+            document.getElementById('detail-title').innerHTML = `
+                Claim Audit: ${claim.id} 
+                <span class="px-2 py-0.5 rounded text-xs font-bold ${isClaimFixed ? 'bg-green-100 text-green-700 border-green-200' : isHighRisk ? 'bg-red-100 text-red-700 border-red-200' : 'bg-green-100 text-green-700 border-green-200'} border tracking-wide uppercase">
+                    ${isClaimFixed ? 'Clean Claim' : isHighRisk ? 'High Risk Detected' : 'No Risk Detected'}
                 </span>
             `;
-        document.getElementById(
-          "detail-subtitle"
-        ).innerText = `${claim.provider} • ${claim.patientName} • ${claim.date}`;
-
-        const btn = document.getElementById("detail-action-btn");
-        if (isHighRisk) {
-          btn.className =
-            "bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm";
-          btn.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4"></i> Prevent Payment`;
-        } else {
-          btn.className =
-            "bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm";
-          btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Approve Payment`;
+            document.getElementById('detail-subtitle').innerText = `${claim.provider} • ${claim.patientName} • ${claim.date}`;
+            
+            const btn = document.getElementById('detail-action-btn');
+            if (isHighRisk) {
+                btn.className = "bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm";
+                btn.innerHTML = `<i data-lucide="shield-alert" class="w-4 h-4"></i> Prevent Payment`;
+            } else {
+                btn.className = "bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 shadow-sm";
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> Approve Payment`;
+            }
+            lucide.createIcons();
         }
-        lucide.createIcons();
-      }
 
-      function switchTab(tab) {
-        activeTab = tab;
-        // Update buttons
-        ["details", "twin", "evidence", "guidance"].forEach((t) => {
-          const btn = document.getElementById(`tab-${t}`);
-          if (t === tab) {
-            btn.className =
-              "px-4 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 border-blue-600 text-blue-600";
-          } else {
-            btn.className =
-              "px-4 py-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-2";
-          }
-        });
-        renderTabContent();
-      }
+        function switchTab(tab) {
+            activeTab = tab;
+            // Update buttons
+            ['details', 'twin', 'evidence', 'guidance'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) {
+                    btn.className = "px-4 py-4 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 border-blue-600 text-blue-600";
+                } else {
+                    btn.className = "px-4 py-4 text-sm font-medium border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-2";
+                }
+            });
+            renderTabContent();
+        }
 
-      function renderTabContent() {
-        const container = document.getElementById("tab-content-area");
-        const c = currentClaim;
-        const res = isClaimFixed
-          ? FIXED_RESULT
-          : MOCK_ANALYSIS_RESULTS[c.id] || {
-              actualDrg: c.drgCode || c.procedureCode,
-              actualDrgDesc: c.drgDescription || c.procedureDescription,
-              actualAmt: c.amount,
-              actualLogic: "Standard",
-              actualCompliance: "Compliant",
-              idealDrg: c.drgCode || c.procedureCode,
-              idealDrgDesc: c.drgDescription || c.procedureDescription,
-              idealAmt: c.amount,
-              idealLogic: "Standard",
-              idealCompliance: "Compliant",
-              financialImpact: 0,
-              rootCauses: [],
-              providerGuidance: [],
-              keyDifferences: [],
-            };
+        function changeAttachment(index) {
+            selectedAttachmentIndex = parseInt(index);
+            renderTabContent();
+        }
 
-        if (activeTab === "details") {
-          container.innerHTML = `
+        function renderTabContent() {
+            const container = document.getElementById('tab-content-area');
+            const c = currentClaim;
+            const res = (isClaimFixed) ? FIXED_RESULT : (MOCK_ANALYSIS_RESULTS[c.id] || { 
+                actualDrg: c.drgCode || c.procedureCode, actualDrgDesc: c.drgDescription || c.procedureDescription, actualAmt: c.amount, actualLogic: 'Standard', actualCompliance: 'Compliant',
+                idealDrg: c.drgCode || c.procedureCode, idealDrgDesc: c.drgDescription || c.procedureDescription, idealAmt: c.amount, idealLogic: 'Standard', idealCompliance: 'Compliant',
+                financialImpact: 0, rootCauses: [], providerGuidance: [], keyDifferences: []
+            });
+
+            if (activeTab === 'details') {
+                container.innerHTML = `
                     <div class="max-w-6xl mx-auto space-y-6 animate-fade-in">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -1601,18 +691,10 @@
                                     <h3 class="font-bold text-slate-900 text-sm">Patient Demographics</h3>
                                 </div>
                                 <div class="p-5 grid grid-cols-2 gap-y-4 gap-x-6">
-                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Full Name</span><span class="font-medium text-slate-900">${
-                                      c.patientName
-                                    }</span></div>
-                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Member ID</span><span class="font-mono text-sm font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block">${
-                                      c.memberId
-                                    }</span></div>
-                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Date of Birth</span><span class="font-medium text-slate-900">${
-                                      c.patientDob
-                                    }</span></div>
-                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Gender</span><span class="font-medium text-slate-900">${
-                                      c.gender
-                                    }</span></div>
+                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Full Name</span><span class="font-medium text-slate-900">${c.patientName}</span></div>
+                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Member ID</span><span class="font-mono text-sm font-medium text-slate-700 bg-slate-100 px-2 py-0.5 rounded inline-block">${c.memberId}</span></div>
+                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Date of Birth</span><span class="font-medium text-slate-900">${c.patientDob}</span></div>
+                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Gender</span><span class="font-medium text-slate-900">${c.gender}</span></div>
                                 </div>
                             </div>
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -1623,19 +705,11 @@
                                 <div class="p-5 grid grid-cols-2 gap-y-4 gap-x-6">
                                     <div class="col-span-2">
                                         <span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Facility / Provider</span>
-                                        <span class="font-medium text-slate-900 block">${
-                                          c.facility
-                                        }</span>
-                                        <span class="text-xs text-slate-500">${
-                                          c.provider
-                                        } • NPI: ${c.providerNpi}</span>
+                                        <span class="font-medium text-slate-900 block">${c.facility}</span>
+                                        <span class="text-xs text-slate-500">${c.provider} • NPI: ${c.providerNpi}</span>
                                     </div>
-                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Admission Date</span><span class="font-medium text-slate-900 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> ${
-                                      c.admissionDate
-                                    }</span></div>
-                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Discharge Date</span><span class="font-medium text-slate-900 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> ${
-                                      c.dischargeDate || "N/A"
-                                    }</span></div>
+                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Admission Date</span><span class="font-medium text-slate-900 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> ${c.admissionDate}</span></div>
+                                    <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-0.5">Discharge Date</span><span class="font-medium text-slate-900 flex items-center gap-1"><i data-lucide="calendar" class="w-3 h-3 text-slate-400"></i> ${c.dischargeDate || 'N/A'}</span></div>
                                 </div>
                             </div>
                         </div>
@@ -1650,12 +724,8 @@
                                          <div>
                                              <span class="text-xs text-slate-400 block uppercase tracking-wider mb-1">Diagnosis</span>
                                              <div class="flex items-start gap-2">
-                                                 <span class="font-mono text-sm font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-100">${
-                                                   c.diagnosisCode
-                                                 }</span>
-                                                 <span class="text-sm text-slate-700 mt-0.5">${
-                                                   c.diagnosisDescription
-                                                 }</span>
+                                                 <span class="font-mono text-sm font-bold bg-blue-50 text-blue-700 px-2 py-1 rounded border border-blue-100">${c.diagnosisCode}</span>
+                                                 <span class="text-sm text-slate-700 mt-0.5">${c.diagnosisDescription}</span>
                                              </div>
                                          </div>
                                      </div>
@@ -1663,35 +733,25 @@
                                          <div>
                                              <span class="text-xs text-slate-400 block uppercase tracking-wider mb-1">Procedure</span>
                                              <div class="flex items-start gap-2">
-                                                 <span class="font-mono text-sm font-bold bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-100">${
-                                                   c.procedureCode
-                                                 }</span>
-                                                 <span class="text-sm text-slate-700 mt-0.5">${
-                                                   c.procedureDescription
-                                                 }</span>
+                                                 <span class="font-mono text-sm font-bold bg-indigo-50 text-indigo-700 px-2 py-1 rounded border border-indigo-100">${c.procedureCode}</span>
+                                                 <span class="text-sm text-slate-700 mt-0.5">${c.procedureDescription}</span>
                                              </div>
                                          </div>
                                      </div>
                                      <div class="space-y-4">
                                          <div>
                                              <span class="text-xs text-slate-400 block uppercase tracking-wider mb-1">DRG / Classification</span>
-                                             ${
-                                               c.drgCode
-                                                 ? `
+                                             ${c.drgCode ? `
                                              <div class="flex items-start gap-2">
                                                  <span class="font-mono text-sm font-bold bg-purple-50 text-purple-700 px-2 py-1 rounded border border-purple-100">${c.drgCode}</span>
                                                  <span class="text-sm text-slate-700 mt-0.5">${c.drgDescription}</span>
-                                             </div>`
-                                                 : '<span class="text-sm text-slate-400 italic">Not applicable</span>'
-                                             }
+                                             </div>` : '<span class="text-sm text-slate-400 italic">Not applicable</span>'}
                                          </div>
                                      </div>
                                  </div>
                                  <div class="mt-6 pt-4 border-t border-slate-100">
                                      <span class="text-xs text-slate-400 block uppercase tracking-wider mb-2">Clinical Summary</span>
-                                     <p class="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200 italic">"${
-                                       c.clinicalSummary
-                                     }"</p>
+                                     <p class="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-200 italic">"${c.clinicalSummary}"</p>
                                  </div>
                              </div>
                         </div>
@@ -1704,14 +764,8 @@
                                  <div class="p-5 space-y-4">
                                      <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-1">Billed Amount</span><span class="text-2xl font-bold text-slate-900">$${c.amount.toLocaleString()}</span></div>
                                      <div class="grid grid-cols-2 gap-4">
-                                         <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-1">Units</span><span class="font-medium text-slate-900">${
-                                           c.units
-                                         }</span></div>
-                                         <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-1">Modifiers</span><span class="font-mono text-sm font-medium text-slate-700">${
-                                           c.modifiers && c.modifiers.length > 0
-                                             ? c.modifiers.join(", ")
-                                             : "None"
-                                         }</span></div>
+                                         <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-1">Units</span><span class="font-medium text-slate-900">${c.units}</span></div>
+                                         <div><span class="text-xs text-slate-400 block uppercase tracking-wider mb-1">Modifiers</span><span class="font-mono text-sm font-medium text-slate-700">${c.modifiers && c.modifiers.length > 0 ? c.modifiers.join(', ') : 'None'}</span></div>
                                      </div>
                                  </div>
                             </div>
@@ -1721,42 +775,26 @@
                                      <h3 class="font-bold text-slate-900 text-sm">Attachments</h3>
                                  </div>
                                  <div class="p-5">
-                                     ${
-                                       c.attachments.length > 0
-                                         ? `
+                                     ${c.attachments.length > 0 ? `
                                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                         ${c.attachments
-                                           .map(
-                                             (file) => `
+                                         ${c.attachments.map(file => `
                                          <div class="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors group cursor-pointer">
-                                             <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                                               file.type === "pdf"
-                                                 ? "bg-red-50 text-red-500"
-                                                 : "bg-blue-50 text-blue-500"
-                                             }">
+                                             <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${file.type === 'pdf' ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'}">
                                                  <i data-lucide="file" class="w-5 h-5"></i>
                                              </div>
                                              <div class="min-w-0 flex-1">
-                                                 <p class="text-sm font-medium text-slate-900 truncate group-hover:text-blue-600 transition-colors">${
-                                                   file.name
-                                                 }</p>
-                                                 <p class="text-xs text-slate-400">${
-                                                   file.date
-                                                 } • ${file.size}</p>
+                                                 <p class="text-sm font-medium text-slate-900 truncate group-hover:text-blue-600 transition-colors">${file.name}</p>
+                                                 <p class="text-xs text-slate-400">${file.date} • ${file.size}</p>
                                              </div>
-                                         </div>`
-                                           )
-                                           .join("")}
-                                     </div>`
-                                         : '<div class="text-center py-6 text-slate-400 text-sm italic">No attachments found.</div>'
-                                     }
+                                         </div>`).join('')}
+                                     </div>` : '<div class="text-center py-6 text-slate-400 text-sm italic">No attachments found.</div>'}
                                  </div>
                             </div>
                         </div>
                     </div>
                 `;
-        } else if (activeTab === "twin") {
-          container.innerHTML = `
+            } else if (activeTab === 'twin') {
+                container.innerHTML = `
                     <div class="max-w-6xl mx-auto space-y-6 animate-fade-in">
                         <div class="bg-slate-900 text-white rounded-xl shadow-lg border border-slate-800 overflow-hidden">
                             <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
@@ -1769,137 +807,83 @@
                                     <h4 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Actual Claim</h4>
                                     <div class="space-y-6">
                                         <div class="flex justify-between items-end border-b border-slate-800 pb-4">
-                                            <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">DRG</p><p class="text-white font-bold">${
-                                              res.actualDrg
-                                            }</p><p class="text-sm text-slate-400">${
-            res.actualDrgDesc
-          }</p></div>
+                                            <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">DRG</p><p class="text-white font-bold">${res.actualDrg}</p><p class="text-sm text-slate-400">${res.actualDrgDesc}</p></div>
                                             <div class="text-right"><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Allowed Amount</p><p class="text-2xl font-bold text-white">$${c.amount.toLocaleString()}</p></div>
                                         </div>
-                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Logic Applied</p><p class="text-sm font-medium text-slate-300">${
-                                          res.actualLogic
-                                        }</p></div>
-                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Evidence Used</p><p class="text-sm font-medium text-slate-300">${
-                                          res.actualEvidence
-                                        }</p></div>
-                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Compliance</p><p class="text-sm font-medium text-yellow-500">${
-                                          res.actualCompliance
-                                        }</p></div>
+                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Logic Applied</p><p class="text-sm font-medium text-slate-300">${res.actualLogic}</p></div>
+                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Evidence Used</p><p class="text-sm font-medium text-slate-300">${res.actualEvidence}</p></div>
+                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Compliance</p><p class="text-sm font-medium text-yellow-500">${res.actualCompliance}</p></div>
                                     </div>
-                                    ${
-                                      res.gapAnalysis
-                                        ? `<div class="mt-6 pt-4 border-t border-slate-800"><div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase"><i data-lucide="shield-alert" class="w-3 h-3"></i> Gaps</div><p class="mt-2 text-sm text-slate-400">${res.gapAnalysis}</p></div>`
-                                        : ""
-                                    }
+                                    ${res.gapAnalysis ? `<div class="mt-6 pt-4 border-t border-slate-800"><div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-orange-500/10 border border-orange-500/30 text-orange-400 text-xs font-bold uppercase"><i data-lucide="shield-alert" class="w-3 h-3"></i> Gaps</div><p class="mt-2 text-sm text-slate-400">${res.gapAnalysis}</p></div>` : ''}
                                 </div>
                                 <div class="p-6 bg-slate-900 relative">
                                     <div class="absolute top-6 right-6"><span class="text-[10px] font-bold text-orange-400 uppercase tracking-wider border border-orange-900/50 bg-orange-900/20 px-2 py-0.5 rounded-full">Ideal Outcome</span></div>
                                     <h4 class="text-sm font-bold text-orange-500 uppercase tracking-widest mb-6">Digital Twin Claim</h4>
                                     <div class="space-y-6">
                                         <div class="flex justify-between items-end border-b border-slate-800 pb-4">
-                                            <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">DRG</p><p class="text-white font-bold">${
-                                              res.idealDrg
-                                            }</p><p class="text-sm text-slate-400">${
-            res.idealDrgDesc
-          }</p></div>
-                                            <div class="text-right"><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Expected Allowed</p><p class="text-2xl font-bold text-green-400">$${(
-                                              c.amount - res.financialImpact
-                                            ).toLocaleString()}</p></div>
+                                            <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">DRG</p><p class="text-white font-bold">${res.idealDrg}</p><p class="text-sm text-slate-400">${res.idealDrgDesc}</p></div>
+                                            <div class="text-right"><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Expected Allowed</p><p class="text-2xl font-bold text-green-400">$${(c.amount - res.financialImpact).toLocaleString()}</p></div>
                                         </div>
-                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Logic Applied</p><p class="text-sm font-medium text-slate-300">${
-                                          res.idealLogic
-                                        }</p></div>
-                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Evidence Used</p><p class="text-sm font-medium text-slate-300">${
-                                          res.idealEvidence
-                                        }</p></div>
-                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Compliance</p><p class="text-sm font-medium text-green-400">${
-                                          res.idealCompliance
-                                        }</p></div>
+                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Logic Applied</p><p class="text-sm font-medium text-slate-300">${res.idealLogic}</p></div>
+                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Evidence Used</p><p class="text-sm font-medium text-slate-300">${res.idealEvidence}</p></div>
+                                        <div><p class="text-xs text-slate-500 uppercase tracking-wider mb-1">Compliance</p><p class="text-sm font-medium text-green-400">${res.idealCompliance}</p></div>
                                     </div>
-                                    ${
-                                      !isClaimFixed && res.financialImpact > 0
-                                        ? `<div class="mt-6 pt-4 border-t border-slate-800"><div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-bold uppercase"><i data-lucide="brain-circuit" class="w-3 h-3"></i> Twin Delta</div><p class="mt-2 text-sm text-slate-300">Potential overpayment identified: <span class="text-red-400 font-bold">$${res.financialImpact.toLocaleString()}</span> on this claim.</p></div>`
-                                        : ""
-                                    }
+                                    ${!isClaimFixed && res.financialImpact > 0 ? `<div class="mt-6 pt-4 border-t border-slate-800"><div class="inline-flex items-center gap-2 px-3 py-1 rounded bg-green-500/10 border border-green-500/30 text-green-400 text-xs font-bold uppercase"><i data-lucide="brain-circuit" class="w-3 h-3"></i> Twin Delta</div><p class="mt-2 text-sm text-slate-300">Potential overpayment identified: <span class="text-red-400 font-bold">$${res.financialImpact.toLocaleString()}</span> on this claim.</p></div>` : ''}
                                 </div>
                             </div>
                         </div>
-                        ${
-                          res.keyDifferences && res.keyDifferences.length > 0
-                            ? `
+                        ${res.keyDifferences && res.keyDifferences.length > 0 ? `
                         <div class="bg-slate-900 text-slate-300 rounded-xl border border-slate-800 p-6">
                             <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Key Differences Highlighted by Integrity Mirror</h4>
                             <ul class="space-y-3">
-                                ${res.keyDifferences
-                                  .map(
-                                    (diff) =>
-                                      `<li class="flex items-start gap-3 text-sm"><div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div><span>${
-                                        diff.includes(":")
-                                          ? `<strong>${
-                                              diff.split(":")[0]
-                                            }:</strong>${diff.split(":")[1]}`
-                                          : diff
-                                      }</span></li>`
-                                  )
-                                  .join("")}
+                                ${res.keyDifferences.map(diff => `<li class="flex items-start gap-3 text-sm"><div class="mt-1.5 w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0"></div><span>${diff.includes(':') ? `<strong>${diff.split(':')[0]}:</strong>${diff.split(':')[1]}` : diff}</span></li>`).join('')}
                             </ul>
                             <div class="mt-6 flex gap-4"><button onclick="switchTab('evidence')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">Drill into Root Cause & Evidence</button><button class="px-4 py-2 border border-slate-700 hover:bg-slate-800 text-slate-300 text-sm font-medium rounded-lg transition-colors">Route to Integrity Review Queue</button></div>
-                        </div>`
-                            : ""
-                        }
+                        </div>` : ''}
                     </div>
                 `;
-        } else if (activeTab === "evidence") {
-          const attachment = c.attachments[0];
-          const contentHtml = attachment.content.replace(
-            /\*([^*]+)\*/g,
-            '<span class="bg-yellow-200 text-slate-900 font-bold px-1 rounded">$1</span>'
-          );
+            } else if (activeTab === 'evidence') {
+                const attachment = c.attachments[selectedAttachmentIndex] || c.attachments[0];
+                const contentHtml = attachment.content ? 
+                    attachment.content.replace(/\*([^*]+)\*/g, '<span class="bg-yellow-200 text-slate-900 font-bold px-1 rounded">$1</span>') 
+                    : '<div class="text-center text-slate-400 italic mt-20">[No text content available]</div>';
 
-          container.innerHTML = `
+                const dropdownHtml = c.attachments.length > 1 ? `
+                    <div class="flex items-center gap-2">
+                        <select onchange="changeAttachment(this.value)" class="text-xs border border-slate-300 rounded px-2 py-1 bg-white outline-none cursor-pointer">
+                            ${c.attachments.map((a, i) => `<option value="${i}" ${i === selectedAttachmentIndex ? 'selected' : ''}>${a.name}</option>`).join('')}
+                        </select>
+                    </div>
+                ` : '';
+                
+                container.innerHTML = `
                     <div class="flex h-[600px] border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm animate-fade-in">
                         <div class="w-1/2 bg-slate-100 flex flex-col border-r border-slate-200">
-                             <div class="px-4 py-3 bg-white border-b border-slate-200 flex justify-between items-center"><h3 class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><i data-lucide="file-text" class="w-3 h-3"></i> Source: ${
-                               attachment.name
-                             }</h3></div>
+                             <div class="px-4 py-3 bg-white border-b border-slate-200 flex justify-between items-center">
+                                <h3 class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2"><i data-lucide="file-text" class="w-3 h-3"></i> Source: ${attachment.name}</h3>
+                                ${dropdownHtml}
+                             </div>
                              <div class="flex-1 p-8 overflow-y-auto"><div class="bg-white shadow-xl min-h-[500px] p-8 text-sm font-serif whitespace-pre-wrap font-mono text-xs leading-relaxed">${contentHtml}</div></div>
                         </div>
                         <div class="w-1/2 bg-white flex flex-col p-6 overflow-y-auto">
                             <h3 class="font-bold text-slate-900 border-b pb-3 mb-4">Root Cause Analysis</h3>
-                            ${
-                              res.rootCauses.length === 0
-                                ? '<div class="text-center py-10 text-slate-500">No discrepancies found.</div>'
-                                : `<div class="space-y-4">${res.rootCauses
-                                    .map(
-                                      (rc) => `
+                            ${res.rootCauses.length === 0 ? 
+                                '<div class="text-center py-10 text-slate-500">No discrepancies found.</div>' : 
+                                `<div class="space-y-4">${res.rootCauses.map(rc => `
                                     <div class="bg-white border border-red-100 rounded-xl p-5 shadow-sm relative overflow-hidden group hover:shadow-md transition-shadow">
                                         <div class="absolute left-0 top-0 bottom-0 w-1 bg-red-500"></div>
-                                        <div class="flex justify-between items-start mb-2"><h4 class="font-bold text-slate-900 text-sm flex items-center gap-2"><i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i> ${
-                                          rc.title
-                                        }</h4><span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase ${
-                                        rc.severity === "high"
-                                          ? "bg-red-100 text-red-700"
-                                          : "bg-yellow-100 text-yellow-700"
-                                      }">${rc.severity}</span></div>
-                                        <p class="text-sm text-slate-600 mb-4 pl-6">${
-                                          rc.desc
-                                        }</p>
+                                        <div class="flex justify-between items-start mb-2"><h4 class="font-bold text-slate-900 text-sm flex items-center gap-2"><i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i> ${rc.title}</h4><span class="text-[10px] font-bold px-2 py-0.5 rounded uppercase ${rc.severity === 'high' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}">${rc.severity}</span></div>
+                                        <p class="text-sm text-slate-600 mb-4 pl-6">${rc.desc}</p>
                                     </div>
-                                `
-                                    )
-                                    .join("")}
-                                ${
-                                  !isClaimFixed
-                                    ? `<div class="mt-8 p-6 bg-slate-50 rounded-xl border border-slate-200 text-center"><h4 class="font-bold text-slate-900 mb-2">Remediation Required</h4><p class="text-sm text-slate-500 mb-4">Resolve these issues to proceed with payment.</p><button onclick="handleAutoCorrect()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2 mx-auto"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Auto-Correct & Revalidate</button></div>`
-                                    : ""
-                                }
+                                `).join('')}
+                                ${!isClaimFixed ? `<div class="mt-8 p-6 bg-slate-50 rounded-xl border border-slate-200 text-center"><h4 class="font-bold text-slate-900 mb-2">Remediation Required</h4><p class="text-sm text-slate-500 mb-4">Resolve these issues to proceed with payment.</p><button onclick="handleAutoCorrect()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg text-sm font-medium flex items-center gap-2 mx-auto"><i data-lucide="refresh-cw" class="w-4 h-4"></i> Auto-Correct & Revalidate</button></div>` : ''}
                                 </div>`
                             }
                         </div>
                     </div>
                 `;
-        } else if (activeTab === "guidance") {
-          container.innerHTML = `
+            } else if (activeTab === 'guidance') {
+                container.innerHTML = `
                     <div class="max-w-4xl mx-auto animate-fade-in pb-12">
                         <div class="bg-slate-900 rounded-2xl shadow-xl overflow-hidden mb-6">
                             <div class="p-8 border-b border-slate-800">
@@ -1907,68 +891,40 @@
                                 <p class="text-blue-200 text-sm">Actionable steps reconciled with payer policy and member contract terms.</p>
                             </div>
                             <div class="p-8 grid gap-6">
-                                ${
-                                  res.providerGuidance.length > 0
-                                    ? res.providerGuidance
-                                        .map(
-                                          (item) => `
+                                ${res.providerGuidance.length > 0 ? res.providerGuidance.map(item => `
                                     <div class="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-xl overflow-hidden hover:bg-slate-800 transition-colors group">
                                         <div class="p-5 flex gap-4 border-b border-slate-700/50">
-                                            <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0"><i data-lucide="${
-                                              item.icon === "code"
-                                                ? "file-code"
-                                                : item.icon === "review"
-                                                ? "search"
-                                                : "paperclip"
-                                            }" class="w-5 h-5"></i></div>
-                                            <div class="flex-1"><h4 class="text-lg font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">${
-                                              item.action
-                                            }</h4><p class="text-slate-300 text-sm">${
-                                            item.detail
-                                          }</p></div>
+                                            <div class="w-10 h-10 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0"><i data-lucide="${item.icon === 'code' ? 'file-code' : item.icon === 'review' ? 'search' : 'paperclip'}" class="w-5 h-5"></i></div>
+                                            <div class="flex-1"><h4 class="text-lg font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">${item.action}</h4><p class="text-slate-300 text-sm">${item.detail}</p></div>
                                             <div class="flex items-start"><button class="text-xs bg-white text-slate-900 px-3 py-1.5 rounded-full font-bold hover:bg-blue-50 transition-colors">Apply Action</button></div>
                                         </div>
-                                        ${
-                                          item.rationale || item.reference
-                                            ? `
+                                        ${item.rationale || item.reference ? `
                                         <div class="bg-slate-900/50 p-5 flex flex-col md:flex-row gap-6 text-sm">
-                                            <div class="flex-1"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Policy Requirement</span><p class="text-slate-400 leading-relaxed">${
-                                              item.rationale ||
-                                              "Adherence to standard guidelines."
-                                            }</p></div>
-                                            ${
-                                              item.reference
-                                                ? `<div class="md:w-1/3 border-l border-slate-700 pl-6 md:block flex flex-col"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Reference Source</span><div class="flex items-start gap-2 text-blue-300"><i data-lucide="book-open" class="w-4 h-4 mt-0.5 shrink-0"></i><span class="font-medium">${item.reference}</span></div></div>`
-                                                : ""
-                                            }
-                                        </div>`
-                                            : ""
-                                        }
+                                            <div class="flex-1"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Policy Requirement</span><p class="text-slate-400 leading-relaxed">${item.rationale || "Adherence to standard guidelines."}</p></div>
+                                            ${item.reference ? `<div class="md:w-1/3 border-l border-slate-700 pl-6 md:block flex flex-col"><span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">Reference Source</span><div class="flex items-start gap-2 text-blue-300"><i data-lucide="book-open" class="w-4 h-4 mt-0.5 shrink-0"></i><span class="font-medium">${item.reference}</span></div></div>` : ''}
+                                        </div>` : ''}
                                     </div>
-                                `
-                                        )
-                                        .join("")
-                                    : '<div class="p-8 text-center text-slate-500 bg-slate-800/30 rounded-xl border border-slate-800"><div class="w-16 h-16 bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check" class="w-8 h-8"></i></div><p class="text-lg font-medium text-slate-300">No corrective actions required.</p></div>'
-                                }
+                                `).join('') : '<div class="p-8 text-center text-slate-500 bg-slate-800/30 rounded-xl border border-slate-800"><div class="w-16 h-16 bg-green-900/30 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4"><i data-lucide="check" class="w-8 h-8"></i></div><p class="text-lg font-medium text-slate-300">No corrective actions required.</p></div>'}
                             </div>
                             <div class="h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
                         </div>
                     </div>
                 `;
+            }
+            lucide.createIcons();
         }
-        lucide.createIcons();
-      }
 
-      function handleAutoCorrect() {
-        isClaimFixed = true;
-        renderHeader(currentClaim); // Update header badges
-        switchTab("twin"); // Switch to twin view to show 0 impact
-      }
+        function handleAutoCorrect() {
+            isClaimFixed = true;
+            renderHeader(currentClaim); // Update header badges
+            switchTab('twin'); // Switch to twin view to show 0 impact
+        }
 
-      // Init
-      window.addEventListener("load", () => {
-        router.navigate("dashboard");
-      });
+        // Init
+        window.addEventListener('load', () => {
+            router.navigate('dashboard');
+        });
+
     </script>
-  </body>
+</body>
 </html>
