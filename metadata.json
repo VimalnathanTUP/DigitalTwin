@@ -1,0 +1,5 @@
+{
+  "name": "Integrity Mirror",
+  "description": "A healthcare payer claims validation system demo for identifying overpayments using an AI Digital Twin engine.",
+  "requestFramePermissions": []
+}
