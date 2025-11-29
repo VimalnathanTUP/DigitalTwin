@@ -2,7 +2,7 @@ import { Claim, ClaimStatus, AnalysisResult } from './types';
 
 export const MOCK_CLAIMS: Claim[] = [
   {
-    id: 'C-1001',
+    id: 'C-2001',
     patientName: 'John Smith',
     patientDob: '1980-04-12',
     memberId: 'MEM-882910',
@@ -19,7 +19,6 @@ export const MOCK_CLAIMS: Claim[] = [
     procedureDescription: 'Initial hospital care',
     drgCode: '194',
     drgDescription: 'Simple Pneumonia & Pleurisy w CC',
-    priorAuthNumber: 'PA-992011',
     amount: 12000,
     units: 1,
     modifiers: [],
@@ -35,63 +34,14 @@ export const MOCK_CLAIMS: Claim[] = [
         size: '1.2MB',
         content: `ADMISSION H&P
 Patient: John Smith
-DOB: 04/12/1980
 Date: 05/18/2024
-
-CC: Shortness of breath, fever.
-
-HPI: 44 y/o male presents with 3 day hx of productive cough and high fevers. 
-
-Vitals: Temp 102.1F, HR 105, BP 130/85, RR 24, SpO2 92% on RA.
-
-Physical Exam: 
-Gen: Alert, mild distress.
-Pulm: *Crackles noted in RLL*. 
-CV: Tachycardic, regular rhythm.
-
-Assessment:
-1. Community Acquired Pneumonia (J18.9).
-2. Dehydration.
-
-Plan: 
-Admit to Medical Floor.
-Start Ceftriaxone/Azithromycin.
-IV Fluids.
-Oxygen 2L NC.`
-      },
-      { 
-        name: 'Discharge_Summary.pdf', 
-        type: 'pdf', 
-        date: '2024-05-20', 
-        size: '0.8MB',
-        content: `DISCHARGE SUMMARY
-Date: 05/20/2024
-
-Hospital Course: Patient responded well to antibiotics. Fever resolved on day 2. Weaned off oxygen.
-
-Discharge Diagnoses:
-1. Pneumonia, RLL.
-2. *Pleural effusion (small) noted on X-ray* (CC).
-
-Discharge Plan:
-Complete oral antibiotics course.
-Follow up with PCP in 1 week.`
-      },
-      { 
-        name: 'Chest_XRay.jpg', 
-        type: 'img', 
-        date: '2024-05-18', 
-        size: '3.5MB',
-        content: `RADIOLOGY REPORT
-Exam: Chest 2 Views
-Findings:
-Focal consolidation in the right lower lobe consistent with pneumonia. Small right-sided pleural effusion present. No pneumothorax.
-Impression: *RLL Pneumonia with parapneumonic effusion*.`
+Assessment: Community Acquired Pneumonia (J18.9).
+Plan: Admit to Medical Floor. Start Ceftriaxone.`
       }
     ]
   },
   {
-    id: 'C-1002',
+    id: 'C-2002',
     patientName: 'Sarah Johnson',
     patientDob: '1975-08-22',
     memberId: 'MEM-445102',
@@ -106,8 +56,6 @@ Impression: *RLL Pneumonia with parapneumonic effusion*.`
     diagnosisDescription: 'Essential (primary) hypertension',
     procedureCode: '99213',
     procedureDescription: 'Office/outpatient visit est',
-    drgCode: 'N/A',
-    drgDescription: 'N/A',
     amount: 250,
     units: 1,
     modifiers: ['25'],
@@ -122,28 +70,13 @@ Impression: *RLL Pneumonia with parapneumonic effusion*.`
         date: '2024-05-21', 
         size: '0.5MB',
         content: `OFFICE VISIT
-Patient: Sarah Johnson
-Date: 05/21/2024
-
-Subjective: Patient returns for BP check. Reports taking Lisinopril as directed. No headaches or dizziness.
-
-Objective:
-BP: 135/82
-HR: 76
-
-Assessment:
-1. Essential Hypertension (I10) - Stable.
-
-Plan:
-Continue current meds.
-*Reviewed lab results drawn today (BMP)* - [NOT ATTACHED TO CHART].
-Refill Lisinopril 10mg.
-Return in 6 months.`
+Assessment: Essential Hypertension (I10).
+Plan: *Reviewed lab results drawn today (BMP)* - [NOT ATTACHED].`
       }
     ]
   },
   {
-    id: 'C-1003',
+    id: 'C-2003',
     patientName: 'David Lee',
     patientDob: '1960-03-15',
     memberId: 'MEM-112233',
@@ -160,7 +93,6 @@ Return in 6 months.`
     procedureDescription: 'Initial hospital care',
     drgCode: '193',
     drgDescription: 'Simple Pneumonia & Pleurisy w MCC',
-    priorAuthNumber: 'PA-551100',
     amount: 19000,
     units: 1,
     modifiers: [],
@@ -175,12 +107,9 @@ Return in 6 months.`
         date: '2024-05-18', 
         size: '0.3MB',
         content: `ADMISSION FACESHEET
-Facility: Metro General Hospital
 Patient: David Lee
-MRN: 9988112
 *DOB: 03/15/1962*  <-- [MISMATCH: Claim says 1960]
-Admit Date: 05/18/2024
-Primary Payor: HealthPlus`
+Admit Date: 05/18/2024`
       },
       { 
         name: 'Progress_Notes.pdf', 
@@ -188,27 +117,13 @@ Primary Payor: HealthPlus`
         date: '2024-05-19', 
         size: '2.1MB',
         content: `INPATIENT PROGRESS NOTE
-Date: 05/19/2024
-
-S: Patient states he feels "much better". Cough improving. No fever.
-
-O: 
 Vitals: Temp 98.6, HR 72, BP 120/80, RR 16, SpO2 98% on Room Air.
-Lungs: Clear to auscultation bilaterally.
-Labs: WBC 8.0 (Normal). Lactate 0.9 (Normal).
-Mental Status: Alert and Oriented x4.
-
-A/P:
-1. Pneumonia - Resolving.
-2. Hypertension - Controlled.
-
-NOTE: *No criteria for Sepsis or Severe Respiratory Failure met*. Patient stable on room air.
-Plan: Switch to oral Levofloxacin. Anticipate discharge tomorrow.`
+NOTE: *No criteria for Sepsis or Severe Respiratory Failure met*. Patient stable.`
       }
     ]
   },
   {
-    id: 'C-1004',
+    id: 'C-2004',
     patientName: 'Maria Gonzalez',
     patientDob: '1985-11-05',
     memberId: 'MEM-998877',
@@ -230,34 +145,18 @@ Plan: Switch to oral Levofloxacin. Anticipate discharge tomorrow.`
     clinicalSummary: "Diabetes screening (E11.9). Documentation aligns with code.",
     attachments: [
       { 
-        name: 'Lab_Order.pdf', 
-        type: 'pdf', 
-        date: '2024-05-22', 
-        size: '0.2MB',
-        content: `LAB REQUISITION
-Order: Hemoglobin A1c
-Dx: *E11.9 (Type 2 Diabetes)*
-Provider: Dr. S. Martinez`
-      },
-      { 
-        name: 'A1C_Results.pdf', 
+        name: 'Lab_Results.pdf', 
         type: 'pdf', 
         date: '2024-05-22', 
         size: '0.4MB',
         content: `LAB RESULTS
 Test: Hemoglobin A1c
-Result: 6.8%
-Reference Range: 
-< 5.7% Normal
-5.7 - 6.4% Prediabetes
-> 6.5% Diabetes
-
-Status: Final`
+Result: 6.8%`
       }
     ]
   },
   {
-    id: 'C-1005',
+    id: 'C-2005',
     patientName: 'James Carter',
     patientDob: '1955-06-30',
     memberId: 'MEM-334455',
@@ -271,7 +170,6 @@ Status: Final`
     diagnosisDescription: 'Atherosclerotic heart disease',
     procedureCode: '92928',
     procedureDescription: 'Stent Placement',
-    priorAuthNumber: 'PA-CARDIAC-01',
     amount: 15000,
     units: 1,
     modifiers: ['LC'],
@@ -286,25 +184,14 @@ Status: Final`
         date: '2024-05-23', 
         size: '0.1MB',
         content: `OPERATIVE NOTE (DRAFT)
-Patient: James Carter
-Procedure: Cardiac Catheterization
-Date: 05/23/2024
-
-Vessels engaged: Left Main, LAD, LCx.
-Intervention:
-*DES deployed to mid-LAD (Left Anterior Descending)*.
-Note: LCx (Left Circumflex) showed 40% stenosis, no intervention performed.
-
-Coding Note:
-Provider billed 92928-LC (Left Circumflex).
-Documentation supports intervention on LAD only (should be -LD modifier or generic code).
-
-*PENDING FINAL CATH LAB HEMODYNAMIC REPORT*`
+Intervention: *DES deployed to mid-LAD*.
+Coding Note: Provider billed 92928-LC (Left Circumflex). Documentation supports LAD only.
+*PENDING FINAL CATH LAB REPORT*`
       }
     ]
   },
   {
-    id: 'C-1006',
+    id: 'C-2006',
     patientName: 'Emily Davis',
     patientDob: '1990-01-15',
     memberId: 'MEM-221100',
@@ -331,24 +218,13 @@ Documentation supports intervention on LAD only (should be -LD modifier or gener
         date: '2024-05-23', 
         size: '0.6MB',
         content: `PULMONARY CLINIC NOTE
-Patient: Emily Davis
-Dx: Asthma
-
-Subjective: Patient reports wheezing with exercise.
-
-Objective:
-Lungs: Diffuse expiratory wheezing.
-Treatment: Administered Albuterol neb x 2 in clinic.
-
-Plan: 
-Continue Advair.
-Spirometry performed pre/post bronchodilator.
+Plan: Spirometry performed.
 *[SPIROMETRY DATA FIELD BLANK]*`
       }
     ]
   },
   {
-    id: 'C-1007',
+    id: 'C-2007',
     patientName: 'Robert Brown',
     patientDob: '2001-09-09',
     memberId: 'MEM-774411',
@@ -376,25 +252,12 @@ Spirometry performed pre/post bronchodilator.
         date: '2024-05-24', 
         size: '1.5MB',
         content: `OPERATIVE REPORT
-Procedure: Laparoscopic Appendectomy
-Indication: Acute Appendicitis
-Findings: *Inflamed, non-perforated appendix identified*.
-Specimen: Appendix sent to pathology.
-Complications: None.`
-      },
-      { 
-        name: 'Pathology_Report.pdf', 
-        type: 'pdf', 
-        date: '2024-05-25', 
-        size: '0.9MB',
-        content: `PATHOLOGY REPORT
-Specimen: Appendix
-Diagnosis: *Acute suppurative appendicitis*. No malignancy.`
+Findings: *Inflamed, non-perforated appendix identified*.`
       }
     ]
   },
   {
-    id: 'C-1008',
+    id: 'C-2008',
     patientName: 'Linda White',
     patientDob: '1948-12-01',
     memberId: 'MEM-665544',
@@ -424,25 +287,13 @@ Diagnosis: *Acute suppurative appendicitis*. No malignancy.`
         date: '2024-05-24', 
         size: '1.1MB',
         content: `DISCHARGE SUMMARY
-Patient: Linda White
-Admit Diagnosis: CVA
-Discharge Diagnosis: Ischemic Stroke
-
-Course:
-Patient presented with L sided weakness. 
-Last known well time was > 6 hours prior to arrival.
 *tPA was NOT administered due to time window*.
-
-Coding Query: 
-DRG 061 billed (Use of Thrombolytic Agent).
-Documentation states tPA NOT given.
-No documentation of Coma or severe MCC.
-Correct DRG should be 065 (Ischemic Stroke w/o CC/MCC).`
+Coding Query: DRG 061 billed (Use of Thrombolytic Agent). Correct DRG should be 062/065.`
       }
     ]
   },
   {
-    id: 'C-1009',
+    id: 'C-2009',
     patientName: 'Michael Green',
     patientDob: '1965-04-20',
     memberId: 'MEM-332211',
@@ -463,21 +314,19 @@ Correct DRG should be 065 (Ischemic Stroke w/o CC/MCC).`
     riskScore: 30,
     clinicalSummary: "ESRD (N18.6). Missing dialysis session note.",
     attachments: [
-        { 
-          name: 'Billing_Sheet.pdf', 
-          type: 'pdf', 
-          date: '2024-05-25', 
-          size: '0.2MB',
-          content: `BILLING FACE SHEET
-Date: 05/25/2024
-Code: 90935 (Hemodialysis, single eval)
-Provider: Dr. Renal
-Note: *Session Log missing from packet*.` 
-        }
+      { 
+        name: 'Billing_Face_Sheet.pdf', 
+        type: 'pdf', 
+        date: '2024-05-25', 
+        size: '0.2MB',
+        content: `BILLING FACE SHEET
+Code: 90935.
+Note: *Session Log missing from packet*.`
+      }
     ]
   },
   {
-    id: 'C-1010',
+    id: 'C-2010',
     patientName: 'Patricia Hall',
     patientDob: '1995-07-17',
     memberId: 'MEM-009988',
@@ -498,24 +347,19 @@ Note: *Session Log missing from packet*.`
     riskScore: 1,
     clinicalSummary: "Upper Resp Infection (J06.9). Documentation supports Level 2.",
     attachments: [
-        { 
-          name: 'Encounter_Note.pdf', 
-          type: 'pdf', 
-          date: '2024-05-25', 
-          size: '0.3MB',
-          content: `URGENT CARE NOTE
-CC: Sore throat, runny nose x 2 days.
-Exam: 
-Throat: Mild erythema, no exudate.
-Lungs: Clear.
+      { 
+        name: 'Encounter_Note.pdf', 
+        type: 'pdf', 
+        date: '2024-05-25', 
+        size: '0.3MB',
+        content: `URGENT CARE NOTE
 Dx: URI.
-Plan: Supportive care, fluids, rest.
-Level of Service: *99212* (Focused history/exam, straightforward decision making).`
-        }
+Level of Service: *99212* (Straightforward decision making).`
+      }
     ]
   },
   {
-    id: 'C-1011',
+    id: 'C-2011',
     patientName: 'William King',
     patientDob: '1950-02-28',
     memberId: 'MEM-776655',
@@ -527,8 +371,8 @@ Level of Service: *99212* (Focused history/exam, straightforward decision making
     claimType: 'Professional',
     diagnosisCode: 'C50.919',
     diagnosisDescription: 'Malignant neoplasm of unsp site of unspecified breast',
-    procedureCode: '19303',
-    procedureDescription: 'Mastectomy, Simple, Complete',
+    procedureCode: '19307',
+    procedureDescription: 'Mastectomy, Modified Radical',
     amount: 9000,
     units: 1,
     modifiers: ['RT'],
@@ -537,27 +381,21 @@ Level of Service: *99212* (Focused history/exam, straightforward decision making
     riskScore: 90,
     clinicalSummary: "Breast Cancer (C50.919). Incorrect coding; Missing pathology report.",
     attachments: [
-        { 
-          name: 'Op_Note.pdf', 
-          type: 'pdf', 
-          date: '2024-05-26', 
-          size: '1.4MB',
-          content: `OPERATIVE NOTE
-Procedure: Right Modified Radical Mastectomy.
-Details: 
-Removed right breast tissue.
-*Dissected Level I and II axillary lymph nodes sent for pathology*.
-Closure: Layered closure with drains placed.
-
-Coding Discrepancy:
-Billed 19303 (Simple Mastectomy).
-Documentation describes removal of axillary lymph nodes.
-Correct code is 19307 (Modified Radical Mastectomy).`
-        }
+      { 
+        name: 'Op_Note.pdf', 
+        type: 'pdf', 
+        date: '2024-05-26', 
+        size: '1.4MB',
+        content: `OPERATIVE NOTE
+Billed: 19307.
+Procedure: Simple Mastectomy.
+*No axillary lymph node dissection performed*.
+Correct Code should be 19303.`
+      }
     ]
   },
   {
-    id: 'C-1012',
+    id: 'C-2012',
     patientName: 'Barbara Scott',
     patientDob: '1970-10-10',
     memberId: 'MEM-443322',
@@ -578,21 +416,19 @@ Correct code is 19307 (Modified Radical Mastectomy).`
     riskScore: 28,
     clinicalSummary: "Hyperlipidemia (E78.5). Missing lipid panel result documentation.",
     attachments: [
-        { 
-          name: 'Lab_Requisition.pdf', 
-          type: 'pdf', 
-          date: '2024-05-26', 
-          size: '0.1MB',
-          content: `LAB ORDER
+      { 
+        name: 'Lab_Requisition.pdf', 
+        type: 'pdf', 
+        date: '2024-05-26', 
+        size: '0.1MB',
+        content: `LAB ORDER
 Test: Lipid Panel (80061)
-Indication: Screening
-Status: Specimen Collected.
 Result: *[PENDING UPLOAD]*`
-        }
+      }
     ]
   },
   {
-    id: 'C-1013',
+    id: 'C-2013',
     patientName: 'Christopher Adams',
     patientDob: '1982-05-05',
     memberId: 'MEM-110099',
@@ -613,26 +449,19 @@ Result: *[PENDING UPLOAD]*`
     riskScore: 6,
     clinicalSummary: "Acute Bronchitis (J20.9). Documentation supports complexity.",
     attachments: [
-        { 
-          name: 'Visit_Summary.pdf', 
-          type: 'pdf', 
-          date: '2024-05-27', 
-          size: '0.4MB',
-          content: `URGENT CARE VISIT
-HPI: Worsening cough x 2 weeks, productive green sputum. History of asthma. Using rescue inhaler q4h.
-Exam: 
-Gen: In distress, speaking in short sentences.
-Lungs: Diffuse wheezing and rhonchi.
-Plan: 
-Nebulizer treatment in office.
-Prescribe Prednisone burst + Azithromycin.
-Detailed asthma action plan review.
-*Level 4 (99214)* supported by moderate complexity and prescription drug management.`
-        }
+      { 
+        name: 'Visit_Summary.pdf', 
+        type: 'pdf', 
+        date: '2024-05-27', 
+        size: '0.4MB',
+        content: `URGENT CARE VISIT
+Plan: Prescribe Prednisone burst + Azithromycin.
+*Level 4 (99214)* supported.`
+      }
     ]
   },
   {
-    id: 'C-1014',
+    id: 'C-2014',
     patientName: 'Jessica Turner',
     patientDob: '1959-11-22',
     memberId: 'MEM-554433',
@@ -653,28 +482,20 @@ Detailed asthma action plan review.
     riskScore: 89,
     clinicalSummary: "Acute MI (I21.9). Incorrect coding; Missing ECG evidence.",
     attachments: [
-        { 
-          name: 'Cath_Report.pdf', 
-          type: 'pdf', 
-          date: '2024-05-27', 
-          size: '1.8MB',
-          content: `CATHETERIZATION REPORT
-Indication: Chest Pain.
-Findings: 90% stenosis of RCA.
-Intervention: DES placed in RCA.
-Note: Patient hemodynamically stable throughout.
-
-Coding Review:
-Billed 92941 (PCI for Acute MI).
+      { 
+        name: 'Cath_Report.pdf', 
+        type: 'pdf', 
+        date: '2024-05-27', 
+        size: '1.8MB',
+        content: `CATHETERIZATION REPORT
 ECG Findings: *[MISSING]*.
-Troponin: 0.04 (Normal).
 Clinical picture consistent with Unstable Angina, NOT Acute MI.
-Code should be 92928 (PCI w/ stent), not 92941.`
-        }
+Code should be 92928 (PCI w/ stent).`
+      }
     ]
   },
   {
-    id: 'C-1015',
+    id: 'C-2015',
     patientName: 'Daniel Harris',
     patientDob: '1978-08-30',
     memberId: 'MEM-223344',
@@ -695,25 +516,14 @@ Code should be 92928 (PCI w/ stent), not 92941.`
     riskScore: 33,
     clinicalSummary: "Low Back Pain (M54.5). Incomplete radiology report.",
     attachments: [
-        { 
-          name: 'XRay_Image_01.jpg', 
-          type: 'img', 
-          date: '2024-05-28', 
-          size: '4.2MB',
-          content: `[IMAGE DATA]
-L-Spine AP/Lateral View.`
-        },
-        { 
-          name: 'Report_Draft.txt', 
-          type: 'doc', 
-          date: '2024-05-28', 
-          size: '0.01MB',
-          content: `RADIOLOGY PRELIMINARY
-Exam: L-Spine
-Findings: Mild degenerative changes L4-L5. No fracture.
-Status: Preliminary.
-Signed by: *[UNSIGNED]* - Requires final radiologist signature for billing.`
-        }
+      { 
+        name: 'Report_Draft.txt', 
+        type: 'doc', 
+        date: '2024-05-28', 
+        size: '0.01MB',
+        content: `RADIOLOGY PRELIMINARY
+Signed by: *[UNSIGNED]* - Requires final radiologist signature.`
+      }
     ]
   }
 ];
@@ -726,7 +536,13 @@ const getNoRiskResult = (claim: Claim): AnalysisResult => ({
     actualDrgDesc: claim.drgDescription || claim.procedureDescription,
     financialImpact: 0,
     rootCauses: [],
-    providerGuidance: [],
+    providerGuidance: [
+      {
+        action: "No Action Required",
+        detail: "Claim is ready for payment.",
+        icon: "review"
+      }
+    ],
     systemicTrend: "Consistent compliance detected for this provider/code.",
     confidence: 0.99,
     actualLogic: "Consistent with clinical indicators",
@@ -741,23 +557,23 @@ const getNoRiskResult = (claim: Claim): AnalysisResult => ({
 
 // Mock results populated for all IDs
 export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
-  'C-1001': getNoRiskResult(MOCK_CLAIMS[0]),
-  'C-1002': {
+  'C-2001': getNoRiskResult(MOCK_CLAIMS[0]),
+  'C-2002': {
     idealDrg: "99213",
     idealDrgDesc: "Outpatient visit Level 3",
     actualDrg: "99213",
     actualDrgDesc: "Outpatient visit Level 3",
     financialImpact: 0,
     rootCauses: [
-      { title: "Missing Clinical Documentation", description: "Basic Metabolic Panel (BMP) result not found in attachment.", type: "missing_info", severity: "low" }
+      { title: "Missing Clinical Documentation", description: "Basic Metabolic Panel (BMP) result not found.", type: "missing_info", severity: "low" }
     ],
     providerGuidance: [
       { 
         action: "Upload Lab Results", 
-        detail: "Attach BMP report.", 
+        detail: "Upload BMP lab result.", 
         icon: "doc",
-        rationale: "Documentation of lab results is required when lab review is a component of MDM for E&M leveling.",
-        reference: "E&M Guidelines 2024, Section: Data Reviewed"
+        rationale: "Lab results referenced in MDM must be attached.",
+        reference: "E&M Guidelines 2024"
       }
     ],
     systemicTrend: "Minor documentation gaps.",
@@ -771,38 +587,45 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
     gapAnalysis: "Missing lab evidence for BMP",
     keyDifferences: ["Lab results referenced but not attached"]
   },
-  'C-1003': {
+  'C-2003': {
     idealDrg: "194",
     idealDrgDesc: "Simple Pneumonia & Pleurisy w CC",
     actualDrg: "193",
     actualDrgDesc: "Simple Pneumonia & Pleurisy w MCC",
     financialImpact: 7000,
     rootCauses: [
-      { title: "Potential Upcoding", description: "No respiratory failure/sepsis documented for MCC.", type: "coding_error", severity: "high" },
-      { title: "Missing Clinical Evidence", description: "Radiology/Labs missing.", type: "missing_info", severity: "medium" },
-      { title: "Patient Identity Mismatch", description: "DOB Mismatch.", type: "contract_mismatch", severity: "high" }
+      { title: "Potential Upcoding", description: "Upcoding suspected; No respiratory failure/sepsis.", type: "coding_error", severity: "high" },
+      { title: "Missing Clinical Evidence", description: "Chest X-ray and Labs missing.", type: "missing_info", severity: "medium" },
+      { title: "Patient Identity Mismatch", description: "DOB Mismatch (1960 vs 1962).", type: "contract_mismatch", severity: "high" }
     ],
     providerGuidance: [
       { 
-        action: "Correct DRG Coding", 
-        detail: "Downgrade claim from DRG 193 to 194. The documentation provided does not substantiate the presence of a Major Complication or Comorbidity (MCC) required for DRG 193.", 
-        icon: "code",
-        rationale: "Per the 'Inpatient Pneumonia Clinical Policy (v2024.1)', MCC assignment requires explicit documentation of acute respiratory failure (J96.0x) or Sepsis (A41.9) with supporting vitals and lab values, which are absent in the current record.",
-        reference: "Policy IP-PN-24, Section 3.2: MCC Validation Criteria"
-      },
-      { 
-        action: "Upload Missing Evidence", 
-        detail: "Attach final Radiology Report and Lab Flowsheets corresponding to the date of service.", 
+        action: "Attach Evidence", 
+        detail: "Attach chest X-ray.", 
         icon: "doc",
-        rationale: "The 'Member Health Plan - Gold' contract stipulates that all inpatient claims exceeding $15,000 must include substantiating diagnostic reports to verify severity of illness.",
-        reference: "Provider Contract, Exhibit B: Claims Submission Requirements"
+        rationale: "Imaging required for pneumonia validation.",
+        reference: "Clinical Policy IP-PN-24"
       },
       { 
-        action: "Verify Patient Demographics", 
-        detail: "Confirm Patient Date of Birth. Claim lists 03/15/1960; EHR indicates 03/15/1962.", 
+        action: "Upload Labs", 
+        detail: "Upload labs.", 
+        icon: "doc",
+        rationale: "Lab confirmation required for MCC assignment.",
+        reference: "Clinical Policy IP-PN-24"
+      },
+      { 
+        action: "Correct Demographics", 
+        detail: "Correct DOB.", 
         icon: "review",
-        rationale: "Accurate demographic matching is required for eligibility verification under the master patient index protocol.",
-        reference: "Admin Guide: Member Eligibility & ID Matching"
+        rationale: "Patient identity must match Master Patient Index.",
+        reference: "Admin Guide: Eligibility"
+      },
+      { 
+        action: "Update Coding", 
+        detail: "Update DRG to 194.", 
+        icon: "code",
+        rationale: "Documentation does not support MCC.",
+        reference: "CMS DRG Definitions"
       }
     ],
     systemicTrend: "High frequency of upcoding.",
@@ -820,24 +643,27 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
         "Financial impact: Overpayment risk of $7,000 on a single claim, intercepted prepay."
     ]
   },
-  'C-1004': getNoRiskResult(MOCK_CLAIMS[3]),
-  'C-1005': {
+  'C-2004': getNoRiskResult(MOCK_CLAIMS[3]),
+  'C-2005': {
     idealDrg: "92929",
     idealDrgDesc: "Stent Placement (Addl)",
     actualDrg: "92928",
     actualDrgDesc: "Stent Placement (Initial)",
     financialImpact: 2000,
     rootCauses: [
-      { title: "Incorrect Coding", description: "Code mismatch for vessel branch.", type: "coding_error", severity: "high" },
-      { title: "Missing Documentation", description: "Cath lab report missing.", type: "missing_info", severity: "high" }
+      { title: "Incorrect Coding", description: "Incorrect coding.", type: "coding_error", severity: "high" },
+      { title: "Missing Documentation", description: "Missing cath lab report.", type: "missing_info", severity: "high" }
     ],
     providerGuidance: [
         { 
+            action: "Correct Coding", 
+            detail: "Correct CPT code.", 
+            icon: "code"
+        },
+        { 
             action: "Upload Report", 
-            detail: "Cath lab report required.", 
-            icon: "doc",
-            rationale: "Procedural validation requires hemodynamic data from the final cath report.",
-            reference: "Cardiology Billing Guide, Sec 4"
+            detail: "Attach cath lab report.", 
+            icon: "doc"
         }
     ],
     systemicTrend: "Frequent coding errors.",
@@ -851,17 +677,17 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
     gapAnalysis: "Modifier usage incorrect for LC vs LD",
     keyDifferences: ["Vessel branch mismatch in coding"]
   },
-  'C-1006': {
+  'C-2006': {
     idealDrg: "94640",
     idealDrgDesc: "Airway Inhalation Treatment",
     actualDrg: "94640",
     actualDrgDesc: "Airway Inhalation Treatment",
     financialImpact: 0,
-    rootCauses: [{ title: "Incomplete Documentation", description: "Spirometry graphs incomplete.", type: "missing_info", severity: "low" }],
+    rootCauses: [{ title: "Incomplete Documentation", description: "Incomplete spirometry documentation.", type: "missing_info", severity: "low" }],
     providerGuidance: [
         { 
-            action: "Update Notes", 
-            detail: "Add spirometry details.", 
+            action: "Upload Report", 
+            detail: "Upload spirometry report.", 
             icon: "doc",
             rationale: "Standard of care for asthma management includes objective spirometry data.",
             reference: "Pulmonary Clinical Policy 2024"
@@ -877,24 +703,27 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
     idealCompliance: "Compliant",
     keyDifferences: ["Spirometry data field blank"]
   },
-  'C-1007': getNoRiskResult(MOCK_CLAIMS[6]),
-  'C-1008': {
+  'C-2007': getNoRiskResult(MOCK_CLAIMS[6]),
+  'C-2008': {
     idealDrg: "062",
     idealDrgDesc: "Ischemic Stroke w/o MCC",
     actualDrg: "061",
     actualDrgDesc: "Ischemic Stroke w MCC",
     financialImpact: 5000,
     rootCauses: [
-      { title: "Upcoding", description: "No evidence of MCC (Coma/Severe complication).", type: "coding_error", severity: "high" },
-      { title: "Missing Evidence", description: "CT/MRI Report missing.", type: "missing_info", severity: "high" }
+      { title: "Upcoding", description: "Upcoding suspected.", type: "coding_error", severity: "high" },
+      { title: "Missing Evidence", description: "Missing neuroimaging evidence.", type: "missing_info", severity: "high" }
     ],
     providerGuidance: [
         { 
-            action: "Upload Imaging", 
-            detail: "CT Head report required.", 
-            icon: "doc",
-            rationale: "Contract requires imaging verification for all stroke claims >$20k.",
-            reference: "Provider Manual Vol 3, Sec 4.5"
+            action: "Attach Evidence", 
+            detail: "Attach MRI/CT results.", 
+            icon: "doc"
+        },
+        { 
+            action: "Update Coding", 
+            detail: "Correct DRG.", 
+            icon: "code"
         }
     ],
     systemicTrend: "Neurology coding audit recommended.",
@@ -908,20 +737,18 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
     gapAnalysis: "Billed for tPA use, but summary states tPA not given",
     keyDifferences: ["tPA administration discrepancy"]
   },
-  'C-1009': {
+  'C-2009': {
     idealDrg: "90935",
     idealDrgDesc: "Hemodialysis Procedure",
     actualDrg: "90935",
     actualDrgDesc: "Hemodialysis Procedure",
     financialImpact: 0,
-    rootCauses: [{ title: "Missing Session Note", description: "Dialysis flowsheet missing.", type: "missing_info", severity: "low" }],
+    rootCauses: [{ title: "Missing Session Note", description: "Missing dialysis session note.", type: "missing_info", severity: "low" }],
     providerGuidance: [
         { 
-            action: "Attach Flowsheet", 
-            detail: "Upload session logs.", 
-            icon: "doc",
-            rationale: "Proof of service delivery requires time-stamped session logs.",
-            reference: "CMS Renal Dialysis Facility Manual"
+            action: "Upload Note", 
+            detail: "Upload dialysis note.", 
+            icon: "doc"
         }
     ],
     systemicTrend: "N/A",
@@ -934,51 +761,52 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
     idealCompliance: "Compliant",
     keyDifferences: ["Session log missing"]
   },
-  'C-1010': getNoRiskResult(MOCK_CLAIMS[9]),
-  'C-1011': {
-    idealDrg: "19307",
-    idealDrgDesc: "Mastectomy, Modified Radical",
-    actualDrg: "19303",
-    actualDrgDesc: "Mastectomy, Simple, Complete",
+  'C-2010': getNoRiskResult(MOCK_CLAIMS[9]),
+  'C-2011': {
+    idealDrg: "19303",
+    idealDrgDesc: "Mastectomy, Simple, Complete",
+    actualDrg: "19307",
+    actualDrgDesc: "Mastectomy, Modified Radical",
     financialImpact: 4000,
     rootCauses: [
-      { title: "Incorrect Coding", description: "Procedure description implies lymph node removal (19307).", type: "coding_error", severity: "high" },
-      { title: "Missing Pathology", description: "Path report not attached.", type: "missing_info", severity: "high" }
+      { title: "Incorrect Coding", description: "Incorrect coding.", type: "coding_error", severity: "high" },
+      { title: "Missing Pathology", description: "Missing pathology report.", type: "missing_info", severity: "high" }
     ],
     providerGuidance: [
         { 
-            action: "Check Op Note", 
-            detail: "Verify if axillary nodes removed.", 
-            icon: "code",
-            rationale: "Axillary lymph node dissection distinguishes modified radical from simple mastectomy.",
-            reference: "NCCI Coding Policy Manual 2024, Ch 6"
+            action: "Attach Evidence", 
+            detail: "Attach pathology report.", 
+            icon: "doc"
+        },
+        { 
+            action: "Correct Coding", 
+            detail: "Correct CPT.", 
+            icon: "code"
         }
     ],
     systemicTrend: "Surgical coding variance.",
     confidence: 0.91,
-    actualLogic: "Simple Mastectomy billed",
-    idealLogic: "Modified Radical Mastectomy logic",
+    actualLogic: "Modified Radical Mastectomy billed",
+    idealLogic: "Simple Mastectomy logic",
     actualEvidence: "Op Note",
-    idealEvidence: "Op Note confirms lymph node dissection",
-    actualCompliance: "Undercoding / Incorrect Coding",
+    idealEvidence: "Op Note confirms no lymph node dissection",
+    actualCompliance: "Upcoding",
     idealCompliance: "Compliant",
-    gapAnalysis: "Procedure code does not match operative details",
-    keyDifferences: ["Lymph node dissection performed but not billed"]
+    gapAnalysis: "Procedure code implies lymph node dissection not found in Op Note",
+    keyDifferences: ["Lymph node dissection billed but not performed"]
   },
-  'C-1012': {
+  'C-2012': {
     idealDrg: "80061",
     idealDrgDesc: "Lipid Panel",
     actualDrg: "80061",
     actualDrgDesc: "Lipid Panel",
     financialImpact: 0,
-    rootCauses: [{ title: "Missing Results", description: "Lipid breakdown values missing.", type: "missing_info", severity: "low" }],
+    rootCauses: [{ title: "Missing Results", description: "Missing lipid panel documentation.", type: "missing_info", severity: "low" }],
     providerGuidance: [
         { 
-            action: "Update Results", 
-            detail: "Enter values in EHR.", 
-            icon: "doc",
-            rationale: "Clinical data exchange standards require result values.",
-            reference: "HIE Interoperability Standards"
+            action: "Upload Results", 
+            detail: "Upload lipid panel results.", 
+            icon: "doc"
         }
     ],
     systemicTrend: "N/A",
@@ -991,24 +819,27 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
     idealCompliance: "Compliant",
     keyDifferences: ["Result values missing"]
   },
-  'C-1013': getNoRiskResult(MOCK_CLAIMS[12]),
-  'C-1014': {
+  'C-2013': getNoRiskResult(MOCK_CLAIMS[12]),
+  'C-2014': {
     idealDrg: "92928",
     idealDrgDesc: "Stent Placement",
     actualDrg: "92941",
     actualDrgDesc: "PCI Acute MI",
     financialImpact: 2500,
     rootCauses: [
-      { title: "Incorrect Coding", description: "No evidence of Acute MI on ECG.", type: "coding_error", severity: "high" },
-      { title: "Missing Evidence", description: "ECG Strip missing.", type: "missing_info", severity: "medium" }
+      { title: "Incorrect Coding", description: "Incorrect coding.", type: "coding_error", severity: "high" },
+      { title: "Missing Evidence", description: "Missing ECG evidence.", type: "missing_info", severity: "medium" }
     ],
     providerGuidance: [
         { 
-            action: "Review ECG", 
-            detail: "Confirm STEMI criteria.", 
-            icon: "review",
-            rationale: "Use of Acute MI code (92941) requires ECG evidence of STEMI or NSTEMI with acute occlusion.",
-            reference: "Cardiology Coverage Determination L3344"
+            action: "Correct Coding", 
+            detail: "Correct CPT.", 
+            icon: "code"
+        },
+        { 
+            action: "Attach Evidence", 
+            detail: "Attach ECG.", 
+            icon: "doc"
         }
     ],
     systemicTrend: "Cardiology review needed.",
@@ -1022,20 +853,18 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
     gapAnalysis: "Missing ECG evidence for Acute MI",
     keyDifferences: ["Troponin normal, inconsistent with AMI"]
   },
-  'C-1015': {
+  'C-2015': {
     idealDrg: "72100",
     idealDrgDesc: "X-Ray Spine",
     actualDrg: "72100",
     actualDrgDesc: "X-Ray Spine",
     financialImpact: 0,
-    rootCauses: [{ title: "Incomplete Report", description: "Radiologist signature missing.", type: "missing_info", severity: "low" }],
+    rootCauses: [{ title: "Incomplete Report", description: "Incomplete radiology report.", type: "missing_info", severity: "low" }],
     providerGuidance: [
         { 
-            action: "Sign Report", 
-            detail: "Obtain signature.", 
-            icon: "review",
-            rationale: "Final billing requires authenticated radiologist signature.",
-            reference: "CMS Claims Processing Manual, Ch 13"
+            action: "Upload Report", 
+            detail: "Upload radiology report.", 
+            icon: "doc"
         }
     ],
     systemicTrend: "N/A",
@@ -1048,6 +877,6 @@ export const MOCK_ANALYSIS_RESULTS: Record<string, AnalysisResult> = {
     idealCompliance: "Compliant",
     keyDifferences: ["Signature missing on report"]
   },
-  // The 'fixed' version of C-1003 after remediation
-  'C-1003-FIXED': getNoRiskResult(MOCK_CLAIMS[2])
+  // The 'fixed' version of C-2003 after remediation
+  'C-2003-FIXED': getNoRiskResult(MOCK_CLAIMS[2])
 };
